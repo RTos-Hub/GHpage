@@ -235,11 +235,6 @@
       <label>グリッド</label>
       <input type="checkbox" id="show-grid" checked>
     </div>
-    <div class="ctrl-group">
-      <label>平滑化</label>
-      <input type="range" id="smooth" min="0" max="5" step="1" value="0">
-      <span class="val-display" id="smooth-val">0</span>
-    </div>
   </div>
 
   <div id="canvas-wrapper">
@@ -278,7 +273,6 @@ const MARGIN_ANGLE = 0.3;   // 上下
 // ═══════════════════════════════════════════════
 let gData      = null;
 let gVscale    = 0.1;
-let gSmooth    = 0;
 let gShowLabel = true;
 let gShowDist  = true;
 let gShowGrid  = true;
@@ -287,29 +281,6 @@ let gShowGrid  = true;
 // ユーティリティ
 // ═══════════════════════════════════════════════
 
-/** ガウス平滑化（σ=sigma） */
-function gaussianSmooth(arr, sigma) {
-  if (sigma <= 0) return arr.slice();
-  const radius = Math.ceil(sigma * 3);
-  const kernel = [];
-  let sum = 0;
-  for (let i = -radius; i <= radius; i++) {
-    const w = Math.exp(-i * i / (2 * sigma * sigma));
-    kernel.push(w);
-    sum += w;
-  }
-  const k = kernel.map(w => w / sum);
-  const out = new Array(arr.length);
-  for (let i = 0; i < arr.length; i++) {
-    let v = 0;
-    for (let j = 0; j < k.length; j++) {
-      const idx = Math.min(Math.max(i + j - radius, 0), arr.length - 1);
-      if (arr[idx] !== null) v += k[j] * arr[idx];
-    }
-    out[i] = v;
-  }
-  return out;
-}
 
 // ═══════════════════════════════════════════════
 // 描画
@@ -324,7 +295,7 @@ function draw() {
   const stats  = d.stats;
 
   // 平滑化
-  const ha = gaussianSmooth(ha_raw, gSmooth);
+  const ha = ha_raw;
 
   // ── スケール計算 ──────────────────────────
   // 縦横 1px = 同じ角度幅（等スケール）
@@ -605,7 +576,7 @@ function setupHover() {
       if (diff < minDiff) { minDiff = diff; nearest = i; }
     }
 
-    const ha    = gaussianSmooth(d.horizon.horizon_angles, gSmooth);
+    const ha    = d.horizon.horizon_angles;
     const angle = ha[nearest];
     const dist  = d.horizon.horizon_dists[nearest];
     const azV   = az[nearest];
@@ -654,14 +625,6 @@ function setupControls() {
   vslider.addEventListener("input", () => {
     gVscale = parseFloat(vslider.value);
     vval.textContent = "×" + gVscale.toFixed(1);
-    draw();
-  });
-
-  const smslider = document.getElementById("smooth");
-  const smval    = document.getElementById("smooth-val");
-  smslider.addEventListener("input", () => {
-    gSmooth = parseInt(smslider.value);
-    smval.textContent = gSmooth;
     draw();
   });
 
