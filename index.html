@@ -65,45 +65,62 @@
     /* ── ツールバー ─────────────────────────── */
     #toolbar {
       flex-shrink: 0;
-      padding: 8px 24px;
+      padding: 5px 12px;
       background: rgba(30,60,100,0.92);
       border-bottom: 1px solid rgba(170,204,238,0.15);
       display: flex;
       align-items: center;
-      gap: 24px;
-      font-size: 0.78rem;
+      gap: 14px;
+      font-size: 0.74rem;
+      overflow-x: auto;
+      white-space: nowrap;
     }
+
+    /* スクロールバーを細く */
+    #toolbar::-webkit-scrollbar { height: 3px; }
+    #toolbar::-webkit-scrollbar-thumb { background: rgba(170,204,238,0.3); }
 
     .ctrl-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
       color: #8a9aaa;
+      flex-shrink: 0;
     }
 
     .ctrl-group label { white-space: nowrap; }
 
     .ctrl-group input[type=range] {
-      width: 100px;
+      width: 80px;
       accent-color: var(--ui-accent);
     }
 
     .ctrl-group input[type=checkbox] {
       accent-color: var(--ui-accent);
-      width: 14px; height: 14px;
+      width: 13px; height: 13px;
     }
 
     .val-display {
       color: var(--ui-accent);
       font-family: var(--font-mono);
-      min-width: 3em;
+      min-width: 2.8em;
     }
 
-    #info-bar {
-      margin-left: auto;
+    /* ── ホバーオーバーレイ（キャンバス内） ── */
+    #hover-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 12px;
+      background: rgba(10, 25, 50, 0.72);
+      color: #a0c8ee;
       font-family: var(--font-mono);
       font-size: 0.72rem;
-      color: #6a7a8a;
+      padding: 4px 10px;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      backdrop-filter: blur(2px);
     }
 
     /* ── キャンバスエリア ───────────────────── */
@@ -196,8 +213,8 @@
 <div id="app">
 
   <div id="header">
-    <h1>山 の 端</h1>
-    <span class="subtitle">東京北部（35.744°N 139.607°E, 標高45m）から見た西方の稜線 — 方位角 220°〜340°</span>
+    <h1>山の端</h1>
+    <span class="subtitle">東京北部（35.744°N 139.607°E）から見た西方の稜線</span>
   </div>
 
   <div id="toolbar">
@@ -223,7 +240,6 @@
       <input type="range" id="smooth" min="0" max="5" step="1" value="0">
       <span class="val-display" id="smooth-val">0</span>
     </div>
-    <div id="info-bar" id="info">カーソルを稜線上に</div>
   </div>
 
   <div id="canvas-wrapper">
@@ -236,6 +252,7 @@
         <canvas id="main-canvas"></canvas>
       </div>
     </div>
+    <div id="hover-overlay">カーソルを稜線上に</div>
   </div>
 
 </div>
@@ -561,16 +578,14 @@ function draw() {
 // ホバー：カーソル位置の方位角・仰角・距離を表示
 // ═══════════════════════════════════════════════
 function setupHover() {
-  const canvas    = document.getElementById("main-canvas");
-  const tooltip   = document.getElementById("tooltip");
-  const infoBar   = document.getElementById("info-bar");
-  const scrollBox = document.getElementById("scroll-container");
+  const canvas        = document.getElementById("main-canvas");
+  const hoverOverlay  = document.getElementById("hover-overlay");
 
   canvas.addEventListener("mousemove", e => {
     if (!gData) return;
-    const rect     = canvas.getBoundingClientRect();
-    const scaleX   = canvas.width / rect.width;
-    const px       = (e.clientX - rect.left) * scaleX;
+    const rect   = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const px     = (e.clientX - rect.left) * scaleX;
 
     const d      = gData;
     const az     = d.horizon.azimuths;
@@ -590,18 +605,18 @@ function setupHover() {
       if (diff < minDiff) { minDiff = diff; nearest = i; }
     }
 
-    const ha = gaussianSmooth(d.horizon.horizon_angles, gSmooth);
+    const ha    = gaussianSmooth(d.horizon.horizon_angles, gSmooth);
     const angle = ha[nearest];
     const dist  = d.horizon.horizon_dists[nearest];
     const azV   = az[nearest];
 
-    infoBar.textContent =
+    hoverOverlay.textContent =
       `方位角: ${azV.toFixed(1)}°  仰角: ${angle !== null ? angle.toFixed(3) + "°" : "---"}  ` +
       `距離: ${dist !== null ? dist.toFixed(1) + " km" : "---"}`;
   });
 
   canvas.addEventListener("mouseleave", () => {
-    if (infoBar) infoBar.textContent = "カーソルを稜線上に";
+    hoverOverlay.textContent = "カーソルを稜線上に";
   });
 }
 
