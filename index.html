@@ -191,6 +191,56 @@
       color: #4a6a8a;
     }
 
+    /* ── 地図ボタン ─────────────────────────── */
+    #map-btn {
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      flex-shrink: 0;
+    }
+    #map-btn:hover { background: rgba(100,150,200,0.5); }
+
+    /* ── 地図オーバーレイ ───────────────────── */
+    #map-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    #map-overlay.visible { display: flex; }
+    #map-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 4px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.9);
+    }
+    #map-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #map-close:hover { background: rgba(255,255,255,0.30); }
+
     /* ── ツールチップ ───────────────────────── */
     #tooltip {
       position: fixed;
@@ -223,6 +273,7 @@
       <input type="range" id="vscale" min="0.1" max="1" step="0.1" value="0.1">
       <span class="val-display" id="vscale-val">×0.1</span>
     </div>
+    <button id="map-btn">地図</button>
     <div class="ctrl-group">
       <label>山名</label>
       <input type="checkbox" id="show-labels" checked>
@@ -235,6 +286,11 @@
       <label>グリッド</label>
       <input type="checkbox" id="show-grid" checked>
     </div>
+  </div>
+
+  <div id="map-overlay">
+    <img src="kanto_map_mini.png" alt="関東周辺地図">
+    <button id="map-close">&#x2715;</button>
   </div>
 
   <div id="canvas-wrapper">
@@ -636,6 +692,18 @@ function setupControls() {
   });
   document.getElementById("show-grid").addEventListener("change", e => {
     gShowGrid = e.target.checked; draw();
+  });
+
+  // 地図オーバーレイ
+  const mapOverlay = document.getElementById("map-overlay");
+  document.getElementById("map-btn").addEventListener("click", () => {
+    mapOverlay.classList.add("visible");
+  });
+  document.getElementById("map-close").addEventListener("click", () => {
+    mapOverlay.classList.remove("visible");
+  });
+  mapOverlay.addEventListener("click", e => {
+    if (e.target === mapOverlay) mapOverlay.classList.remove("visible");
   });
 
   window.addEventListener("resize", draw);
