@@ -35,7 +35,8 @@
     #app {
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100vh;    /* fallback: dvh 非対応ブラウザ用 */
+      height: 100dvh;   /* モバイル: アドレスバーの出入りに追従 */
     }
 
     /* ── ヘッダー ───────────────────────────── */
@@ -219,6 +220,7 @@
     #map-overlay img {
       max-width: 90vw;
       max-height: 90vh;
+      max-height: 90dvh;
       border-radius: 4px;
       box-shadow: 0 4px 32px rgba(0,0,0,0.9);
     }
@@ -240,6 +242,11 @@
       justify-content: center;
     }
     #map-close:hover { background: rgba(255,255,255,0.30); }
+
+    /* タッチ端末: カーソル位置表示は不要なので非表示 */
+    @media (hover: none) {
+      #hover-overlay { display: none; }
+    }
 
     /* ── ツールチップ ───────────────────────── */
     #tooltip {
