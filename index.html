@@ -275,12 +275,8 @@
     </div>
     <button id="map-btn">地図</button>
     <div class="ctrl-group">
-      <label>山名</label>
-      <input type="checkbox" id="show-labels" checked>
-    </div>
-    <div class="ctrl-group">
       <label>距離</label>
-      <input type="checkbox" id="show-dist" checked>
+      <input type="checkbox" id="show-dist">
     </div>
     <div class="ctrl-group">
       <label>グリッド</label>
@@ -329,8 +325,7 @@ const MARGIN_ANGLE = 0.3;   // 上下
 // ═══════════════════════════════════════════════
 let gData      = null;
 let gVscale    = 0.1;
-let gShowLabel = true;
-let gShowDist  = true;
+let gShowDist  = false;
 let gShowGrid  = true;
 
 // ═══════════════════════════════════════════════
@@ -528,7 +523,7 @@ function draw() {
   ctx.stroke();
 
   // ── 山名ラベル ────────────────────────────
-  if (gShowLabel) {
+  {
     const mountains = d.mountains;
     // 重なり防止: 描画済み x 座標を記録
     const placedX = [];
@@ -684,9 +679,6 @@ function setupControls() {
     draw();
   });
 
-  document.getElementById("show-labels").addEventListener("change", e => {
-    gShowLabel = e.target.checked; draw();
-  });
   document.getElementById("show-dist").addEventListener("change", e => {
     gShowDist = e.target.checked; draw();
   });
