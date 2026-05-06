@@ -1,0 +1,8 @@
+{
+  "name": "山の端 — 東京北部からの眺望",
+  "short_name": "山の端",
+  "display": "standalone",
+  "start_url": "./indexPWA.html",
+  "background_color": "#dde8f0",
+  "theme_color": "#1e3c64"
+}
