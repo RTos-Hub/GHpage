@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>山の端 — 東京北部からの眺望</title>
+
+  <!-- ── PWA 設定 ──────────────────────────────── -->
+  <link rel="manifest" href="manifest.json">
+  <!-- iOS Safari: ホーム画面から起動時にアドレスバー・ブックマークバーを非表示 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- iOS ステータスバーの色（black = 黒、UIと合わせる） -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- iOS ホーム画面アイコンのラベル -->
+  <meta name="apple-mobile-web-app-title" content="山の端">
+
+  <style>
+    /* ── リセット・基礎 ─────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky-top:    #2266bb;
+      --sky-mid:    #6699cc;
+      --sky-horiz:  #e8f4f8;
+      --mountain:   #3a5060;
+      --mountain2:  #506878;
+      --label-bg:   rgba(255,255,255,0.88);
+      --label-line: #c04444;
+      --ui-bg:      rgba(30, 60, 100, 0.88);
+      --ui-text:    #e8f4ff;
+      --ui-accent:  #aaccee;
+      --font-main:  'Noto Serif JP', 'Georgia', serif;
+      --font-mono:  'Courier New', monospace;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #dde8f0;
+      color: var(--ui-text);
+      font-family: var(--font-main);
+      overflow: hidden;
+    }
+
+    /* ── レイアウト ─────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;    /* fallback: dvh 非対応ブラウザ用 */
+      height: 100dvh;   /* モバイル: アドレスバーの出入りに追従 */
+    }
+
+    /* ── ヘッダー ───────────────────────────── */
+    #header {
+      flex-shrink: 0;
+      padding: 4px 14px;
+      background: var(--ui-bg);
+      border-bottom: 1px solid rgba(170,204,238,0.3);
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    #header h1 {
+      font-size: 1.0rem;
+      letter-spacing: 0.12em;
+      color: var(--ui-accent);
+      font-weight: 400;
+    }
+
+    #header .subtitle {
+      font-size: 0.70rem;
+      color: #8a9aaa;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── ツールバー ─────────────────────────── */
+    #toolbar {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      background: rgba(30,60,100,0.92);
+      border-bottom: 1px solid rgba(170,204,238,0.15);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.74rem;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    /* スクロールバーを細く */
+    #toolbar::-webkit-scrollbar { height: 3px; }
+    #toolbar::-webkit-scrollbar-thumb { background: rgba(170,204,238,0.3); }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #8a9aaa;
+      flex-shrink: 0;
+    }
+
+    .ctrl-group label { white-space: nowrap; }
+
+    .ctrl-group input[type=range] {
+      width: 80px;
+      accent-color: var(--ui-accent);
+    }
+
+    .ctrl-group input[type=checkbox] {
+      accent-color: var(--ui-accent);
+      width: 13px; height: 13px;
+    }
+
+    .val-display {
+      color: var(--ui-accent);
+      font-family: var(--font-mono);
+      min-width: 2.8em;
+    }
+
+    /* ── ホバーオーバーレイ（キャンバス内） ── */
+    #hover-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 12px;
+      background: rgba(10, 25, 50, 0.72);
+      color: #a0c8ee;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      backdrop-filter: blur(2px);
+    }
+
+    /* タッチ端末: カーソル位置表示は不要なので非表示 */
+    @media (hover: none) {
+      #hover-overlay { display: none; }
+    }
+
+    /* ── キャンバスエリア ───────────────────── */
+    #canvas-wrapper {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #scroll-container {
+      width: 100%;
+      height: 100%;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      cursor: grab;
+    }
+
+    #scroll-container:active { cursor: grabbing; }
+
+    #scroll-container::-webkit-scrollbar {
+      height: 10px;
+    }
+    #scroll-container::-webkit-scrollbar-track {
+      background: #dde8f0;
+    }
+    #scroll-container::-webkit-scrollbar-thumb {
+      background: rgba(50,100,170,0.5);
+      border-radius: 5px;
+    }
+    #scroll-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(50,100,170,0.8);
+    }
+
+    #canvas-inner {
+      height: 100%;
+      /* width は JS で設定 */
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      height: 100%;
+      /* width は JS で設定 */
+    }
+
+    /* ── ローディング ───────────────────────── */
+    #loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #dde8f0;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    #loading .kanji {
+      font-size: 3rem;
+      color: #2266bb;
+      letter-spacing: 0.3em;
+      opacity: 0.8;
+    }
+
+    #loading .msg {
+      font-size: 0.85rem;
+      color: #4a6a8a;
+    }
+
+    /* ── 地図ボタン ─────────────────────────── */
+    #map-btn {
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      flex-shrink: 0;
+    }
+    #map-btn:hover { background: rgba(100,150,200,0.5); }
+
+    /* ── 地図オーバーレイ ───────────────────── */
+    #map-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    #map-overlay.visible { display: flex; }
+    #map-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      max-height: 90dvh;
+      border-radius: 4px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.9);
+    }
+    #map-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #map-close:hover { background: rgba(255,255,255,0.30); }
+
+    /* ── ツールチップ ───────────────────────── */
+    #tooltip {
+      position: fixed;
+      background: var(--label-bg);
+      color: #222;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      border: 1px solid #ccc;
+      white-space: nowrap;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <div id="header">
+    <h1>山の端</h1>
+    <span class="subtitle">東京北部（35.744°N 139.607°E）から見た西方の稜線</span>
+  </div>
+
+  <div id="toolbar">
+    <div class="ctrl-group">
+      <label>横倍率</label>
+      <input type="range" id="vscale" min="0.1" max="1" step="0.1" value="0.1">
+      <span class="val-display" id="vscale-val">×0.1</span>
+    </div>
+    <button id="map-btn">地図</button>
+    <div class="ctrl-group">
+      <label>距離</label>
+      <input type="checkbox" id="show-dist">
+    </div>
+    <div class="ctrl-group">
+      <label>グリッド</label>
+      <input type="checkbox" id="show-grid">
+    </div>
+  </div>
+
+  <div id="map-overlay">
+    <img src="kanto_map_mini.png" alt="関東周辺地図">
+    <button id="map-close">&#x2715;</button>
+  </div>
+
+  <div id="canvas-wrapper">
+    <div id="loading">
+      <div class="kanji">山の端</div>
+      <div class="msg">horizon_export.json を読み込み中...</div>
+    </div>
+    <div id="scroll-container">
+      <div id="canvas-inner">
+        <canvas id="main-canvas"></canvas>
+      </div>
+    </div>
+    <div id="hover-overlay">カーソルを稜線上に</div>
+  </div>
+
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// 定数
+// ═══════════════════════════════════════════════
+const DATA_FILE = "horizon_export.json";
+
+// キャンバスの物理的な高さ（px）— ウィンドウに合わせる
+// 1度 = SCALE_PX px とする（縦横共通）→ 等スケール
+const DEG_PER_PX_BASE = 1 / 80;   // 80px = 1度 が基準
+
+// 余白（度単位）
+const MARGIN_AZ    = 1.0;   // 左右
+const MARGIN_ANGLE = 0.3;   // 上下
+
+// ═══════════════════════════════════════════════
+// グローバル状態
+// ═══════════════════════════════════════════════
+let gData      = null;
+let gVscale    = 0.1;
+let gShowDist  = false;
+let gShowGrid  = false;
+
+// ═══════════════════════════════════════════════
+// ユーティリティ
+// ═══════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════
+// 描画
+// ═══════════════════════════════════════════════
+function draw() {
+  if (!gData) return;
+
+  const d      = gData;
+  const az     = d.horizon.azimuths;
+  const ha_raw = d.horizon.horizon_angles;
+  const hd     = d.horizon.horizon_dists;
+  const stats  = d.stats;
+
+  // 平滑化
+  const ha = ha_raw;
+
+  // ── スケール計算 ──────────────────────────
+  // 縦横 1px = 同じ角度幅（等スケール）
+  // ウィンドウ高さからスケールを決める
+  const wrapper    = document.getElementById("canvas-wrapper");
+  const canvasH    = wrapper.clientHeight;
+
+  // 表示する仰角範囲
+  const validHA   = ha.filter(v => v !== null && isFinite(v));
+  const rawMin    = Math.min(...validHA);
+  const rawMax    = Math.max(...validHA);
+  const angleMin  = rawMin - MARGIN_ANGLE;
+  const angleMax  = rawMax + MARGIN_ANGLE * 3;   // ラベル用に上を広く
+  const angleSpan = angleMax - angleMin;          // 度
+
+  // 1度 = degPx px（縦）
+  const degPx     = (canvasH / angleSpan) * gVscale;
+
+  // 方位角範囲
+  const azMin  = stats.az_min - MARGIN_AZ;
+  const azMax  = stats.az_max + MARGIN_AZ;
+  const azSpan = azMax - azMin;
+
+  // 横幅（縦と同じ degPx を使う → 等スケール）
+  const canvasW = Math.round(azSpan * degPx);
+
+  // キャンバスサイズ設定
+  const canvas  = document.getElementById("main-canvas");
+  const inner   = document.getElementById("canvas-inner");
+  const effectiveH = Math.round(angleSpan * degPx / gVscale);  // 実際のキャンバスpx高
+
+  canvas.width  = canvasW;
+  canvas.height = effectiveH;
+  canvas.style.width  = canvasW + "px";
+  canvas.style.height = "100%";
+  inner.style.width   = canvasW + "px";
+
+  const ctx = canvas.getContext("2d");
+
+  // 座標変換ヘルパー
+  const azToPx = az  => (az  - azMin)    / azSpan * canvasW;
+  const anToPx = ang => (1 - (ang - angleMin) / angleSpan) * effectiveH;
+
+  // ── 空グラデーション ──────────────────────
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, effectiveH);
+  skyGrad.addColorStop(0,    "#2266bb");
+  skyGrad.addColorStop(0.55, "#6699cc");
+  skyGrad.addColorStop(0.85, "#99bbdd");
+  skyGrad.addColorStop(1.0,  "#e8f4f8");
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, canvasW, effectiveH);
+
+  // ── グリッド ──────────────────────────────
+  if (gShowGrid) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.30)";
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([4, 5]);
+
+    // 方位角グリッド（5度刻み）
+    for (let a = Math.ceil(azMin / 5) * 5; a <= azMax; a += 5) {
+      const x = azToPx(a);
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, effectiveH);
+      ctx.stroke();
+    }
+
+    // 仰角グリッド（0.5度刻み）
+    for (let ang = Math.ceil(angleMin / 0.5) * 0.5; ang <= angleMax; ang += 0.5) {
+      const y = anToPx(ang);
+      ctx.beginPath();
+      ctx.moveTo(0,       y);
+      ctx.lineTo(canvasW, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 水平線（0°）
+    const y0 = anToPx(0);
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.55)";
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([8, 5]);
+    ctx.beginPath();
+    ctx.moveTo(0, y0);
+    ctx.lineTo(canvasW, y0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── 方位角ラベル（下端）────────────────────
+  const compassMap = {
+    225: "南西", 240: "西南西", 255: "西南西",
+    270: "西",   285: "西北西", 300: "西北西",
+    315: "北西",  330: "北北西"
+  };
+  const azTicks = [220,225,230,235,240,245,250,255,260,265,270,
+                   275,280,285,290,295,300,305,310,315,320,325,330,335,340];
+  ctx.save();
+  ctx.fillStyle   = "rgba(255,255,255,0.85)";
+  ctx.font        = `${Math.max(10, degPx * 0.18)}px 'Courier New'`;
+  ctx.textAlign   = "center";
+  ctx.textBaseline = "bottom";
+  for (const a of azTicks) {
+    const x   = azToPx(a);
+    const big = a % 10 === 0;
+    // 目盛り線
+    ctx.strokeStyle = big ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.30)";
+    ctx.lineWidth   = big ? 1.5 : 0.7;
+    ctx.beginPath();
+    ctx.moveTo(x, effectiveH - (big ? 18 : 8));
+    ctx.lineTo(x, effectiveH);
+    ctx.stroke();
+    if (big) {
+      ctx.fillStyle = "rgba(255,255,255,0.90)";
+      ctx.fillText(a + "°", x, effectiveH - 20);
+      const label = compassMap[a];
+      if (label) {
+        ctx.fillStyle = "rgba(255,255,255,0.60)";
+        ctx.fillText(label, x, effectiveH - 32);
+      }
+    }
+  }
+  ctx.restore();
+
+  // ── 仰角ラベル（左端）────────────────────
+  ctx.save();
+  ctx.font        = `${Math.max(9, degPx * 0.15)}px 'Courier New'`;
+  ctx.textAlign   = "left";
+  ctx.textBaseline = "middle";
+  for (let ang = Math.ceil(angleMin / 0.5) * 0.5; ang <= angleMax; ang += 0.5) {
+    const y = anToPx(ang);
+    ctx.fillStyle = "rgba(255,255,255,0.65)";
+    ctx.fillText(ang.toFixed(1) + "°", 6, y);
+  }
+  ctx.restore();
+
+  // ── 稜線 塗りつぶし ───────────────────────
+  const grad = ctx.createLinearGradient(0, anToPx(rawMax), 0, effectiveH);
+  grad.addColorStop(0,   "#3a5060");
+  grad.addColorStop(0.4, "#506878");
+  grad.addColorStop(1.0, "#2a3a4a");
+
+  ctx.beginPath();
+  let first = true;
+  for (let i = 0; i < az.length; i++) {
+    if (ha[i] === null) continue;
+    const x = azToPx(az[i]);
+    const y = anToPx(ha[i]);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else        { ctx.lineTo(x, y); }
+  }
+  // 下端へ閉じる
+  ctx.lineTo(azToPx(az[az.length - 1]), effectiveH);
+  ctx.lineTo(azToPx(az[0]), effectiveH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // ── 稜線ライン ────────────────────────────
+  ctx.beginPath();
+  first = true;
+  for (let i = 0; i < az.length; i++) {
+    if (ha[i] === null) continue;
+    const x = azToPx(az[i]);
+    const y = anToPx(ha[i]);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else        { ctx.lineTo(x, y); }
+  }
+  ctx.strokeStyle = "rgba(180,215,235,0.8)";
+  ctx.lineWidth   = 1.5;
+  ctx.setLineDash([]);
+  ctx.stroke();
+
+  // ── 山名ラベル ────────────────────────────
+  {
+    const mountains = d.mountains;
+    // 重なり防止: 描画済み x 座標を記録
+    const placedX = [];
+    const minGap  = degPx * 3.5;   // 3.5度分のギャップ
+
+    // 仰角降順でソート（高い山を優先）
+    const sorted = [...mountains].sort((a, b) => b.angle_deg - a.angle_deg);
+
+    const fontSize = Math.max(11, Math.min(14, degPx * 0.2));
+    ctx.font = `${fontSize}px 'Noto Serif JP', serif`;
+
+    for (const m of sorted) {
+      const x = azToPx(m.azimuth);
+      const y = anToPx(m.angle_deg);
+
+      // 重なりチェック
+      if (placedX.some(px => Math.abs(px - x) < minGap)) continue;
+      placedX.push(x);
+
+      // ラベル内容
+      const lines = [m.name];
+      if (gShowDist) lines.push(`${m.elev}m / ${m.distance_km}km`);
+
+      const lineH    = fontSize + 3;
+      const labelH   = lineH * lines.length + 8;
+      const labelW   = Math.max(...lines.map(l => ctx.measureText(l).width)) + 12;
+      const stemLen  = Math.max(30, degPx * 0.5);
+      const labelTop = Math.max(4, y - stemLen - labelH);
+
+      // ステムライン
+      ctx.save();
+      ctx.strokeStyle = "rgba(200,80,80,0.8)";
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, labelTop + labelH);
+      ctx.stroke();
+      ctx.restore();
+
+      // マーカー
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(220,80,80,0.9)";
+      ctx.fill();
+
+      // ラベル背景
+      const lx = Math.min(x - labelW / 2, canvasW - labelW - 4);
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.beginPath();
+      ctx.roundRect(lx, labelTop, labelW, labelH, 3);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(180,180,180,0.6)";
+      ctx.lineWidth   = 0.7;
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      // ラベルテキスト
+      ctx.fillStyle   = "#1a1a1a";
+      ctx.textAlign   = "left";
+      ctx.textBaseline = "top";
+      for (let li = 0; li < lines.length; li++) {
+        ctx.font = li === 0
+          ? `bold ${fontSize}px 'Noto Serif JP', serif`
+          : `${fontSize - 1}px 'Courier New'`;
+        ctx.fillStyle = li === 0 ? "#1a1a1a" : "#555555";
+        ctx.fillText(lines[li], lx + 6, labelTop + 4 + li * lineH);
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// ホバー：カーソル位置の方位角・仰角・距離を表示
+// ═══════════════════════════════════════════════
+function setupHover() {
+  const canvas        = document.getElementById("main-canvas");
+  const hoverOverlay  = document.getElementById("hover-overlay");
+
+  canvas.addEventListener("mousemove", e => {
+    if (!gData) return;
+    const rect   = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const px     = (e.clientX - rect.left) * scaleX;
+
+    const d      = gData;
+    const az     = d.horizon.azimuths;
+    const stats  = d.stats;
+
+    const azMin  = stats.az_min - MARGIN_AZ;
+    const azMax  = stats.az_max + MARGIN_AZ;
+    const azSpan = azMax - azMin;
+
+    const azAtCursor = azMin + (px / canvas.width) * azSpan;
+
+    // 最近傍インデックス
+    let nearest = 0;
+    let minDiff = Infinity;
+    for (let i = 0; i < az.length; i++) {
+      const diff = Math.abs(az[i] - azAtCursor);
+      if (diff < minDiff) { minDiff = diff; nearest = i; }
+    }
+
+    const ha    = d.horizon.horizon_angles;
+    const angle = ha[nearest];
+    const dist  = d.horizon.horizon_dists[nearest];
+    const azV   = az[nearest];
+
+    hoverOverlay.textContent =
+      `方位角: ${azV.toFixed(1)}°  仰角: ${angle !== null ? angle.toFixed(3) + "°" : "---"}  ` +
+      `距離: ${dist !== null ? dist.toFixed(1) + " km" : "---"}`;
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    hoverOverlay.textContent = "カーソルを稜線上に";
+  });
+}
+
+// ═══════════════════════════════════════════════
+// ドラッグスクロール
+// ═══════════════════════════════════════════════
+function setupDragScroll() {
+  const el = document.getElementById("scroll-container");
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  el.addEventListener("mousedown", e => {
+    isDown = true;
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+  });
+  el.addEventListener("mouseleave", () => { isDown = false; });
+  el.addEventListener("mouseup",   () => { isDown = false; });
+  el.addEventListener("mousemove", e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x    = e.pageX - el.offsetLeft;
+    const walk = x - startX;
+    el.scrollLeft = scrollLeft - walk;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// コントロール
+// ═══════════════════════════════════════════════
+function setupControls() {
+  const vslider = document.getElementById("vscale");
+  const vval    = document.getElementById("vscale-val");
+  vslider.addEventListener("input", () => {
+    gVscale = parseFloat(vslider.value);
+    vval.textContent = "×" + gVscale.toFixed(1);
+    draw();
+  });
+
+  document.getElementById("show-dist").addEventListener("change", e => {
+    gShowDist = e.target.checked; draw();
+  });
+  document.getElementById("show-grid").addEventListener("change", e => {
+    gShowGrid = e.target.checked; draw();
+  });
+
+  // 地図オーバーレイ
+  const mapOverlay = document.getElementById("map-overlay");
+  document.getElementById("map-btn").addEventListener("click", () => {
+    mapOverlay.classList.add("visible");
+  });
+  document.getElementById("map-close").addEventListener("click", () => {
+    mapOverlay.classList.remove("visible");
+  });
+  mapOverlay.addEventListener("click", e => {
+    if (e.target === mapOverlay) mapOverlay.classList.remove("visible");
+  });
+
+  window.addEventListener("resize", draw);
+}
+
+// ═══════════════════════════════════════════════
+// 起動
+// ═══════════════════════════════════════════════
+async function init() {
+  try {
+    const res  = await fetch(DATA_FILE);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    gData = await res.json();
+
+    document.getElementById("loading").style.display = "none";
+
+    setupControls();
+    setupHover();
+    setupDragScroll();
+    draw();
+  } catch (err) {
+    document.querySelector("#loading .msg").textContent =
+      `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
+    console.error(err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
