@@ -467,15 +467,15 @@ function draw() {
     ctx.lineWidth   = big ? 1.5 : 0.7;
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x, big ? 18 : 8);
+    ctx.lineTo(x, big ? 9 : 6);
     ctx.stroke();
     if (big) {
       ctx.fillStyle = "rgba(255,255,255,0.90)";
-      ctx.fillText(a + "°", x, 20);
+      ctx.fillText(a + "°", x, 11);
       const label = compassMap[a];
       if (label) {
         ctx.fillStyle = "rgba(255,255,255,0.60)";
-        ctx.fillText(label, x, 32);
+        ctx.fillText(label, x, 23);
       }
     }
   }
