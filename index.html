@@ -487,9 +487,19 @@ function draw() {
   ctx.textAlign   = "left";
   ctx.textBaseline = "middle";
   for (let ang = Math.ceil(angleMin / 0.5) * 0.5; ang <= angleMax; ang += 0.5) {
-    const y = anToPx(ang);
-    ctx.fillStyle = "rgba(255,255,255,0.65)";
-    ctx.fillText(ang.toFixed(1) + "°", 6, y);
+    const y   = anToPx(ang);
+    const big = Math.abs(ang % 1) < 0.001;
+    // 目盛り線（左端から右方向）
+    ctx.strokeStyle = big ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.30)";
+    ctx.lineWidth   = big ? 1.5 : 0.7;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(big ? 9 : 6, y);
+    ctx.stroke();
+    if (big) {
+      ctx.fillStyle = "rgba(255,255,255,0.65)";
+      ctx.fillText(ang.toFixed(1) + "°", 11, y);
+    }
   }
   ctx.restore();
 
