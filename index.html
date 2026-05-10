@@ -703,6 +703,25 @@ function setupPinchZoom() {
 }
 
 // ═══════════════════════════════════════════════
+// ホイール → 縦倍率変更
+// ═══════════════════════════════════════════════
+function setupWheelZoom() {
+  const el      = document.getElementById("scroll-container");
+  const vslider = document.getElementById("vscale");
+  const vval    = document.getElementById("vscale-val");
+
+  el.addEventListener("wheel", e => {
+    e.preventDefault();
+    const step  = 0.1;
+    const delta = e.deltaY > 0 ? -step : step;
+    gVscale = Math.round(Math.min(1.0, Math.max(0.1, gVscale + delta)) * 10) / 10;
+    vslider.value    = gVscale;
+    vval.textContent = "×" + gVscale.toFixed(1);
+    draw();
+  }, { passive: false });
+}
+
+// ═══════════════════════════════════════════════
 // ドラッグスクロール
 // ═══════════════════════════════════════════════
 function setupDragScroll() {
@@ -775,6 +794,7 @@ async function init() {
     setupControls();
     setupHover();
     setupPinchZoom();
+    setupWheelZoom();
     setupDragScroll();
     draw();
   } catch (err) {
