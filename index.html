@@ -446,7 +446,7 @@ function draw() {
     ctx.restore();
   }
 
-  // ── 方位角ラベル（下端）────────────────────
+  // ── 方位角ラベル（上端）────────────────────
   const compassMap = {
     225: "南西", 240: "西南西", 255: "西南西",
     270: "西",   285: "西北西", 300: "西北西",
@@ -456,26 +456,26 @@ function draw() {
                    275,280,285,290,295,300,305,310,315,320,325,330,335,340];
   ctx.save();
   ctx.fillStyle   = "rgba(255,255,255,0.85)";
-  ctx.font        = `${Math.max(10, degPx * 0.18)}px 'Courier New'`;
+  ctx.font        = `${Math.max(10, Math.min(12, degPx * 0.18))}px 'Courier New'`;
   ctx.textAlign   = "center";
-  ctx.textBaseline = "bottom";
+  ctx.textBaseline = "top";
   for (const a of azTicks) {
     const x   = azToPx(a);
     const big = a % 10 === 0;
-    // 目盛り線
+    // 目盛り線（上端から下方向）
     ctx.strokeStyle = big ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.30)";
     ctx.lineWidth   = big ? 1.5 : 0.7;
     ctx.beginPath();
-    ctx.moveTo(x, effectiveH - (big ? 18 : 8));
-    ctx.lineTo(x, effectiveH);
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, big ? 18 : 8);
     ctx.stroke();
     if (big) {
       ctx.fillStyle = "rgba(255,255,255,0.90)";
-      ctx.fillText(a + "°", x, effectiveH - 20);
+      ctx.fillText(a + "°", x, 20);
       const label = compassMap[a];
       if (label) {
         ctx.fillStyle = "rgba(255,255,255,0.60)";
-        ctx.fillText(label, x, effectiveH - 32);
+        ctx.fillText(label, x, 32);
       }
     }
   }
@@ -483,7 +483,7 @@ function draw() {
 
   // ── 仰角ラベル（左端）────────────────────
   ctx.save();
-  ctx.font        = `${Math.max(9, degPx * 0.15)}px 'Courier New'`;
+  ctx.font        = `${Math.max(9, Math.min(11, degPx * 0.15))}px 'Courier New'`;
   ctx.textAlign   = "left";
   ctx.textBaseline = "middle";
   for (let ang = Math.ceil(angleMin / 0.5) * 0.5; ang <= angleMax; ang += 0.5) {
