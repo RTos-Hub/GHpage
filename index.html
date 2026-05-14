@@ -448,9 +448,8 @@ function draw() {
 
   // ── 方位角ラベル（上端）────────────────────
   const compassMap = {
-    225: "南西", 240: "西南西", 255: "西南西",
-    270: "西",   285: "西北西", 300: "西北西",
-    315: "北西",  330: "北北西"
+    225: "南西", 247.5: "西南西", 270: "西",
+    292.5: "西北西", 315: "北西",  337.5: "北北西"
   };
   const azTicks = [220,225,230,235,240,245,250,255,260,265,270,
                    275,280,285,290,295,300,305,310,315,320,325,330,335,340];
@@ -472,12 +471,13 @@ function draw() {
     if (big) {
       ctx.fillStyle = "rgba(255,255,255,0.90)";
       ctx.fillText(a + "°", x, 11);
-      const label = compassMap[a];
-      if (label) {
-        ctx.fillStyle = "rgba(255,255,255,0.60)";
-        ctx.fillText(label, x, 23);
-      }
     }
+  }
+  // 方位名ラベル（22.5°ごと）
+  for (const [az, name] of Object.entries(compassMap)) {
+    const x = azToPx(parseFloat(az));
+    ctx.fillStyle = "rgba(255,255,255,0.60)";
+    ctx.fillText(name, x, 23);
   }
   ctx.restore();
 
