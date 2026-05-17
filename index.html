@@ -244,6 +244,34 @@
     }
     #map-close:hover { background: rgba(255,255,255,0.30); }
 
+    /* ── 山選択 ─────────────────────────────── */
+    #mountain-select {
+      background: rgba(10, 30, 65, 0.92);
+      color: var(--ui-accent);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 3px;
+      padding: 2px 4px;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      max-width: 108px;
+    }
+    #mountain-select option {
+      background: #0d1e38;
+      color: #c8e0f4;
+    }
+    #mountain-clear {
+      background: none;
+      border: 1px solid rgba(170,204,238,0.3);
+      color: #8a9aaa;
+      border-radius: 3px;
+      padding: 1px 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+    #mountain-clear:hover { color: var(--ui-accent); border-color: var(--ui-accent); }
+
     /* タッチ端末: カーソル位置表示は不要なので非表示 */
     @media (hover: none) {
       #hover-overlay { display: none; }
@@ -290,6 +318,13 @@
       <label>グリッド</label>
       <input type="checkbox" id="show-grid">
     </div>
+    <div class="ctrl-group">
+      <label>山名</label>
+      <select id="mountain-select">
+        <option value="">— 選択 —</option>
+      </select>
+      <button id="mountain-clear" title="選択解除">✕</button>
+    </div>
   </div>
 
   <div id="map-overlay">
@@ -331,10 +366,13 @@ const MARGIN_ANGLE = 0.3;   // 上下
 // ═══════════════════════════════════════════════
 // グローバル状態
 // ═══════════════════════════════════════════════
-let gData      = null;
-let gVscale    = 0.1;
-let gShowDist  = false;
-let gShowGrid  = false;
+let gData             = null;
+let gVscale           = 0.1;
+let gShowDist         = false;
+let gShowGrid         = false;
+let gKantoMountains   = [];
+let gSelectedMountain = null;
+let gScale            = null;   // draw() が保存するスケール情報
 
 // ═══════════════════════════════════════════════
 // ユーティリティ
@@ -612,6 +650,83 @@ function draw() {
       }
     }
   }
+
+  // ── 選択山ハイライト ──────────────────────────
+  if (gSelectedMountain) {
+    const m  = gSelectedMountain;
+    const x  = azToPx(m.azimuth);
+    const y  = anToPx(m.angle_deg);
+    const r  = 7;
+
+    // 縦線（黄色点線）
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 210, 40, 0.80)";
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([8, 5]);
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, effectiveH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ステムライン（マーカー→ラベルへ）
+    const selLines   = [m.name, `${m.elev}m  ${m.distance_km}km`];
+    const selFontSz  = Math.max(11, Math.min(14, degPx * 0.2));
+    ctx.font = `bold ${selFontSz}px 'Noto Serif JP', serif`;
+    const selLw      = Math.max(...selLines.map(l => ctx.measureText(l).width)) + 14;
+    const selLineH   = selFontSz + 3;
+    const selLh      = selLineH * selLines.length + 8;
+    const selStem    = Math.max(30, degPx * 0.5);
+    const selTop     = Math.max(4, y - r - selStem - selLh);
+    const selLx      = Math.min(Math.max(4, x - selLw / 2), canvasW - selLw - 4);
+
+    ctx.strokeStyle = "rgba(255, 200, 0, 0.85)";
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.lineTo(x, selTop + selLh);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ラベル背景（黄味がかった白）
+    ctx.fillStyle   = "rgba(255, 248, 190, 0.97)";
+    ctx.strokeStyle = "rgba(180, 130, 0, 0.8)";
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.roundRect(selLx, selTop, selLw, selLh, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // ラベルテキスト
+    for (let li = 0; li < selLines.length; li++) {
+      ctx.font = li === 0
+        ? `bold ${selFontSz}px 'Noto Serif JP', serif`
+        : `${selFontSz - 1}px 'Courier New'`;
+      ctx.fillStyle    = li === 0 ? "#3a2000" : "#664400";
+      ctx.textAlign    = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(selLines[li], selLx + 7, selTop + 4 + li * selLineH);
+    }
+
+    // 菱形マーカー
+    ctx.beginPath();
+    ctx.moveTo(x,     y - r);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x,     y + r);
+    ctx.lineTo(x - r, y);
+    ctx.closePath();
+    ctx.fillStyle   = "rgba(255, 210, 40, 0.95)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+    ctx.lineWidth   = 1.5;
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // スケール情報を保存（scrollToMountain で使用）
+  gScale = { azMin, azSpan, canvasW };
 }
 
 // ═══════════════════════════════════════════════
@@ -781,6 +896,69 @@ function setupControls() {
 }
 
 // ═══════════════════════════════════════════════
+// 山リストボックス
+// ═══════════════════════════════════════════════
+function mountainOptionText(m) {
+  return `${m.name}  :  ${m.elev}m  ${m.distance_km}km  ${m.azimuth.toFixed(1)}°`;
+}
+
+function refreshOptionTexts(selectedIdx) {
+  const sel = document.getElementById("mountain-select");
+  for (const opt of sel.options) {
+    const idx = parseInt(opt.value, 10);
+    if (isNaN(idx)) continue;
+    const m = gKantoMountains[idx];
+    opt.textContent = (idx === selectedIdx) ? m.name : mountainOptionText(m);
+  }
+}
+
+async function loadKantoMountains() {
+  try {
+    const res = await fetch("kanto_mountains.json");
+    if (!res.ok) return;
+    const data = await res.json();
+    gKantoMountains = data.mountains;
+
+    const sel = document.getElementById("mountain-select");
+    gKantoMountains.forEach((m, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = mountainOptionText(m);
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.warn("kanto_mountains.json の読み込み失敗", e);
+  }
+}
+
+function scrollToMountain(m) {
+  if (!gScale) return;
+  const x  = (m.azimuth - gScale.azMin) / gScale.azSpan * gScale.canvasW;
+  const sc = document.getElementById("scroll-container");
+  sc.scrollLeft = x - sc.clientWidth / 2;
+}
+
+function setupMountainSelect() {
+  const sel = document.getElementById("mountain-select");
+  const clr = document.getElementById("mountain-clear");
+
+  sel.addEventListener("change", () => {
+    const idx = parseInt(sel.value, 10);
+    gSelectedMountain = isNaN(idx) ? null : gKantoMountains[idx];
+    refreshOptionTexts(isNaN(idx) ? -1 : idx);
+    draw();
+    if (gSelectedMountain) scrollToMountain(gSelectedMountain);
+  });
+
+  clr.addEventListener("click", () => {
+    sel.value         = "";
+    gSelectedMountain = null;
+    refreshOptionTexts(-1);
+    draw();
+  });
+}
+
+// ═══════════════════════════════════════════════
 // 起動
 // ═══════════════════════════════════════════════
 async function init() {
@@ -796,6 +974,8 @@ async function init() {
     setupPinchZoom();
     setupWheelZoom();
     setupDragScroll();
+    await loadKantoMountains();
+    setupMountainSelect();
     draw();
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
