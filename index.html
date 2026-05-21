@@ -603,12 +603,17 @@ function draw() {
     ctx.setLineDash([]);
 
     // ステムライン（マーカー→ラベルへ）
-    const selLines   = [m.name, `${m.elev}m  ${m.distance_km}km`];
+    const selLines   = [m.name, `${m.elev}m ${m.distance_km}km`];
     const selFontSz  = Math.max(11, Math.min(14, degPx * 0.2));
+    const selNameSz  = selFontSz + 2;
+    ctx.font = `bold ${selNameSz}px 'Noto Serif JP', serif`;
+    const w0 = ctx.measureText(selLines[0]).width;
     ctx.font = `bold ${selFontSz}px 'Noto Serif JP', serif`;
-    const selLw      = Math.max(...selLines.map(l => ctx.measureText(l).width)) + 14;
-    const selLineH   = selFontSz + 3;
-    const selLh      = selLineH * selLines.length + 8;
+    const w1 = ctx.measureText(selLines[1]).width;
+    const selLw      = Math.max(w0, w1) + 14;
+    const selNameH   = selNameSz + 3;
+    const selDataH   = selFontSz + 3;
+    const selLh      = selNameH + selDataH + 8;
     const selStem    = Math.max(30, degPx * 0.5);
     const selTop     = Math.max(4, y - r - selStem - selLh);
     const selLx      = Math.min(Math.max(4, x - selLw / 2), canvasW - selLw - 4);
@@ -634,12 +639,12 @@ function draw() {
     // ラベルテキスト
     for (let li = 0; li < selLines.length; li++) {
       ctx.font = li === 0
-        ? `bold ${selFontSz}px 'Noto Serif JP', serif`
-        : `${selFontSz - 1}px 'Courier New'`;
+        ? `bold ${selNameSz}px 'Noto Serif JP', serif`
+        : `bold ${selFontSz}px 'Noto Serif JP', serif`;
       ctx.fillStyle    = li === 0 ? "#3a2000" : "#664400";
       ctx.textAlign    = "left";
       ctx.textBaseline = "top";
-      ctx.fillText(selLines[li], selLx + 7, selTop + 4 + li * selLineH);
+      ctx.fillText(selLines[li], selLx + 7, selTop + 4 + (li === 0 ? 0 : selNameH));
     }
 
     // 菱形マーカー
