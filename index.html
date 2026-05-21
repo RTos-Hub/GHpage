@@ -663,6 +663,23 @@ function draw() {
 }
 
 // ═══════════════════════════════════════════════
+// 中心方位角を保ちながら再描画
+// ═══════════════════════════════════════════════
+function drawPreserveCenter() {
+  const sc = document.getElementById("scroll-container");
+  let centerAz = null;
+  if (gScale) {
+    const centerPx = sc.scrollLeft + sc.clientWidth / 2;
+    centerAz = gScale.azMin + (centerPx / gScale.canvasW) * gScale.azSpan;
+  }
+  draw();
+  if (centerAz !== null && gScale) {
+    const newCenterPx = (centerAz - gScale.azMin) / gScale.azSpan * gScale.canvasW;
+    sc.scrollLeft = newCenterPx - sc.clientWidth / 2;
+  }
+}
+
+// ═══════════════════════════════════════════════
 // ホバー：カーソル位置の方位角・仰角・距離を表示
 // ═══════════════════════════════════════════════
 function setupHover() {
@@ -739,7 +756,7 @@ function setupPinchZoom() {
     const vval    = document.getElementById("vscale-val");
     vslider.value     = newScale;
     vval.textContent  = "×" + newScale.toFixed(2);
-    draw();
+    drawPreserveCenter();
   }, { passive: false });
 
   el.addEventListener("touchend", e => {
@@ -765,7 +782,7 @@ function setupWheelZoom() {
     gVscale = Math.round(Math.min(1.0, Math.max(0.1, gVscale + delta)) * 10) / 10;
     vslider.value    = gVscale;
     vval.textContent = "×" + gVscale.toFixed(1);
-    draw();
+    drawPreserveCenter();
   }, { passive: false });
 }
 
@@ -803,7 +820,7 @@ function setupControls() {
   vslider.addEventListener("input", () => {
     gVscale = parseFloat(vslider.value);
     vval.textContent = "×" + gVscale.toFixed(1);
-    draw();
+    drawPreserveCenter();
   });
 
   // 地図オーバーレイ
@@ -818,7 +835,7 @@ function setupControls() {
     if (e.target === mapOverlay) mapOverlay.classList.remove("visible");
   });
 
-  window.addEventListener("resize", draw);
+  window.addEventListener("resize", drawPreserveCenter);
 }
 
 // ═══════════════════════════════════════════════
