@@ -311,14 +311,6 @@
     </div>
     <button id="map-btn">地図</button>
     <div class="ctrl-group">
-      <label>距離</label>
-      <input type="checkbox" id="show-dist">
-    </div>
-    <div class="ctrl-group">
-      <label>グリッド</label>
-      <input type="checkbox" id="show-grid">
-    </div>
-    <div class="ctrl-group">
       <label>山名</label>
       <select id="mountain-select">
         <option value="">— 選択 —</option>
@@ -368,8 +360,6 @@ const MARGIN_ANGLE = 0.3;   // 上下
 // ═══════════════════════════════════════════════
 let gData             = null;
 let gVscale           = 0.1;
-let gShowDist         = false;
-let gShowGrid         = false;
 let gKantoMountains   = [];
 let gSelectedMountain = null;
 let gScale            = null;   // draw() が保存するスケール情報
@@ -444,45 +434,6 @@ function draw() {
   skyGrad.addColorStop(1.0,  "#e8f4f8");
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, canvasW, effectiveH);
-
-  // ── グリッド ──────────────────────────────
-  if (gShowGrid) {
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.30)";
-    ctx.lineWidth   = 1;
-    ctx.setLineDash([4, 5]);
-
-    // 方位角グリッド（5度刻み）
-    for (let a = Math.ceil(azMin / 5) * 5; a <= azMax; a += 5) {
-      const x = azToPx(a);
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, effectiveH);
-      ctx.stroke();
-    }
-
-    // 仰角グリッド（0.5度刻み）
-    for (let ang = Math.ceil(angleMin / 0.5) * 0.5; ang <= angleMax; ang += 0.5) {
-      const y = anToPx(ang);
-      ctx.beginPath();
-      ctx.moveTo(0,       y);
-      ctx.lineTo(canvasW, y);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // 水平線（0°）
-    const y0 = anToPx(0);
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.55)";
-    ctx.lineWidth   = 1.5;
-    ctx.setLineDash([8, 5]);
-    ctx.beginPath();
-    ctx.moveTo(0, y0);
-    ctx.lineTo(canvasW, y0);
-    ctx.stroke();
-    ctx.restore();
-  }
 
   // ── 方位角ラベル（上端）────────────────────
   const compassMap = {
@@ -601,30 +552,12 @@ function draw() {
 
       // ラベル内容
       const lines = [m.name];
-      if (gShowDist) lines.push(`${m.elev}m / ${m.distance_km}km`);
 
       const lineH    = fontSize + 3;
       const labelH   = lineH * lines.length + 8;
       const labelW   = Math.max(...lines.map(l => ctx.measureText(l).width)) + 12;
       const stemLen  = Math.max(30, degPx * 0.5);
       const labelTop = Math.max(4, y - stemLen - labelH);
-
-      // ステムライン
-      ctx.save();
-      ctx.strokeStyle = "rgba(200,80,80,0.8)";
-      ctx.lineWidth   = 1;
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x, labelTop + labelH);
-      ctx.stroke();
-      ctx.restore();
-
-      // マーカー
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(220,80,80,0.9)";
-      ctx.fill();
 
       // ラベル背景
       const lx = Math.min(x - labelW / 2, canvasW - labelW - 4);
@@ -871,13 +804,6 @@ function setupControls() {
     gVscale = parseFloat(vslider.value);
     vval.textContent = "×" + gVscale.toFixed(1);
     draw();
-  });
-
-  document.getElementById("show-dist").addEventListener("change", e => {
-    gShowDist = e.target.checked; draw();
-  });
-  document.getElementById("show-grid").addEventListener("change", e => {
-    gShowGrid = e.target.checked; draw();
   });
 
   // 地図オーバーレイ
