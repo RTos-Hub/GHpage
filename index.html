@@ -857,7 +857,7 @@ function refreshOptionTexts(selectedIdx) {
 
 async function loadKantoMountains() {
   try {
-    const res = await fetch("kanto_mountains.json");
+    const res = await fetch("kanto_mountains.json?v=" + Date.now(), { cache: "no-store" });
     if (!res.ok) return;
     const data = await res.json();
     gKantoMountains = data.mountains;
@@ -906,7 +906,7 @@ function setupMountainSelect() {
 // ═══════════════════════════════════════════════
 async function init() {
   try {
-    const res  = await fetch(DATA_FILE);
+    const res  = await fetch(DATA_FILE + "?v=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     gData = await res.json();
 
