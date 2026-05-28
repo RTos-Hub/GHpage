@@ -1,0 +1,10 @@
+{
+  "name": "山の端 — 東京北部からの眺望",
+  "short_name": "山の端",
+  "description": "石神井公園から見える奥秩父・奥多摩・丹沢・富士山の山並みビューア",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "orientation": "landscape"
+}
