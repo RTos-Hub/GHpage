@@ -6,5 +6,13 @@
   "display": "fullscreen",
   "background_color": "#1a1a2e",
   "theme_color": "#1a1a2e",
-  "orientation": "landscape"
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "./yamanoha_icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
