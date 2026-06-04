@@ -912,6 +912,91 @@ function setupMountainSelect() {
 }
 
 // ═══════════════════════════════════════════════
+// クリック／タップ → 最近傍の山を選択
+// ═══════════════════════════════════════════════
+function setupClickSelect() {
+  const el     = document.getElementById("scroll-container");
+  const canvas = document.getElementById("main-canvas");
+
+  // ── マウス：ドラッグと区別してクリック判定 ──
+  let mouseDownX          = null;
+  let mouseDownScrollLeft = null;
+
+  el.addEventListener("mousedown", e => {
+    mouseDownX          = e.clientX;
+    mouseDownScrollLeft = el.scrollLeft;
+  });
+
+  el.addEventListener("mouseup", e => {
+    if (mouseDownX === null) return;
+    const movedClient = Math.abs(e.clientX - mouseDownX);
+    const movedScroll = Math.abs(el.scrollLeft - mouseDownScrollLeft);
+    mouseDownX = null;
+    if (movedClient > 5 || movedScroll > 5) return;   // ドラッグは無視
+    handleSelect(e.clientX, e.clientY);
+  });
+
+  // ── タッチ：ピンチ・スクロールと区別してタップ判定 ──
+  let touchStartX   = null;
+  let touchStartY   = null;
+  let touchWasMulti = false;
+
+  el.addEventListener("touchstart", e => {
+    if (e.touches.length === 1) {
+      touchStartX   = e.touches[0].clientX;
+      touchStartY   = e.touches[0].clientY;
+      touchWasMulti = false;
+    } else {
+      touchWasMulti = true;
+    }
+  }, { passive: true });
+
+  el.addEventListener("touchend", e => {
+    if (touchStartX === null || touchWasMulti) { touchStartX = null; return; }
+    if (e.changedTouches.length !== 1)          { touchStartX = null; return; }
+    const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    const cx = e.changedTouches[0].clientX;
+    touchStartX = null;
+    touchStartY = null;
+    if (dx > 10 || dy > 10) return;   // スクロールは無視
+    handleSelect(cx, e.changedTouches[0].clientY);
+  }, { passive: true });
+
+  // ── 共通処理：clientX → 方位角 → 最近傍の山を選択 ──
+  function handleSelect(clientX, clientY) {
+    if (!gData || gKantoMountains.length === 0) return;
+
+    const rect   = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const px     = (clientX - rect.left) * scaleX;
+    if (px < 0 || px > canvas.width) return;
+
+    // キャンバス上端 10% はツールバー誤操作防止のため無効
+    const py = clientY - rect.top;
+    if (py < rect.height * 0.10) return;
+
+    const stats  = gData.stats;
+    const azMin  = stats.az_min - MARGIN_AZ;
+    const azMax  = stats.az_max + MARGIN_AZ;
+    const azSpan = azMax - azMin;
+    const azAtClick = azMin + (px / canvas.width) * azSpan;
+
+    let nearest = -1;
+    let minDiff = Infinity;
+    for (let i = 0; i < gKantoMountains.length; i++) {
+      const diff = Math.abs(gKantoMountains[i].azimuth - azAtClick);
+      if (diff < minDiff) { minDiff = diff; nearest = i; }
+    }
+    if (nearest < 0) return;
+
+    const sel = document.getElementById("mountain-select");
+    sel.value = nearest;
+    sel.dispatchEvent(new Event("change"));
+  }
+}
+
+// ═══════════════════════════════════════════════
 // 起動
 // ═══════════════════════════════════════════════
 async function init() {
@@ -929,6 +1014,7 @@ async function init() {
     setupDragScroll();
     await loadKantoMountains();
     setupMountainSelect();
+    setupClickSelect();
     draw();
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
