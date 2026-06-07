@@ -888,6 +888,9 @@ function scrollToMountain(m) {
   if (!gScale) return;
   const x  = (m.azimuth - gScale.azMin) / gScale.azSpan * gScale.canvasW;
   const sc = document.getElementById("scroll-container");
+  const visL = sc.scrollLeft;
+  const visR = sc.scrollLeft + sc.clientWidth;
+  if (x >= visL && x <= visR) return;
   sc.scrollLeft = x - sc.clientWidth / 2;
 }
 
