@@ -277,6 +277,28 @@
     }
     #mountain-clear:hover { color: var(--ui-accent); border-color: var(--ui-accent); }
 
+    #mountain-prev, #mountain-next {
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      flex-shrink: 0;
+      white-space: nowrap;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    #mountain-prev:hover:not(:disabled), #mountain-next:hover:not(:disabled) {
+      background: rgba(100,150,200,0.5);
+    }
+    #mountain-prev:disabled, #mountain-next:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
     /* タッチ端末: カーソル位置表示は不要なので非表示 */
     @media (hover: none) {
       #hover-overlay { display: none; }
@@ -321,6 +343,8 @@
         <option value="">— 選択 —</option>
       </select>
       <button id="mountain-clear" title="選択解除">✕</button>
+      <button id="mountain-prev">◀ 左の山</button>
+      <button id="mountain-next">右の山 ▶</button>
     </div>
   </div>
 
@@ -894,6 +918,60 @@ function scrollToMountain(m) {
   sc.scrollLeft = x - sc.clientWidth / 2;
 }
 
+function getCenterMountainIdx() {
+  if (!gScale || gKantoMountains.length === 0) return -1;
+  const sc = document.getElementById("scroll-container");
+  const centerPx = sc.scrollLeft + sc.clientWidth / 2;
+  const centerAz = gScale.azMin + (centerPx / gScale.canvasW) * gScale.azSpan;
+  let nearest = 0, minDiff = Infinity;
+  for (let i = 0; i < gKantoMountains.length; i++) {
+    const diff = Math.abs(gKantoMountains[i].azimuth - centerAz);
+    if (diff < minDiff) { minDiff = diff; nearest = i; }
+  }
+  return nearest;
+}
+
+function updateNavButtons() {
+  const sel  = document.getElementById("mountain-select");
+  const prev = document.getElementById("mountain-prev");
+  const next = document.getElementById("mountain-next");
+  const idx  = parseInt(sel.value, 10);
+  prev.disabled = !isNaN(idx) && idx === 0;
+  next.disabled = !isNaN(idx) && idx === gKantoMountains.length - 1;
+}
+
+function setupNavButtons() {
+  const sel  = document.getElementById("mountain-select");
+  const prev = document.getElementById("mountain-prev");
+  const next = document.getElementById("mountain-next");
+
+  prev.addEventListener("click", () => {
+    const idx = parseInt(sel.value, 10);
+    if (isNaN(idx)) {
+      const c = getCenterMountainIdx();
+      if (c < 0) return;
+      sel.value = c;
+    } else {
+      sel.value = Math.max(0, idx - 1);
+    }
+    sel.dispatchEvent(new Event("change"));
+  });
+
+  next.addEventListener("click", () => {
+    const idx = parseInt(sel.value, 10);
+    if (isNaN(idx)) {
+      const c = getCenterMountainIdx();
+      if (c < 0) return;
+      sel.value = c;
+    } else {
+      sel.value = Math.min(gKantoMountains.length - 1, idx + 1);
+    }
+    sel.dispatchEvent(new Event("change"));
+  });
+
+  updateNavButtons();
+}
+
 function setupMountainSelect() {
   const sel = document.getElementById("mountain-select");
   const clr = document.getElementById("mountain-clear");
@@ -904,6 +982,7 @@ function setupMountainSelect() {
     refreshOptionTexts(isNaN(idx) ? -1 : idx);
     draw();
     if (gSelectedMountain) scrollToMountain(gSelectedMountain);
+    updateNavButtons();
   });
 
   clr.addEventListener("click", () => {
@@ -911,6 +990,7 @@ function setupMountainSelect() {
     gSelectedMountain = null;
     refreshOptionTexts(-1);
     draw();
+    updateNavButtons();
   });
 }
 
@@ -1017,6 +1097,7 @@ async function init() {
     setupDragScroll();
     await loadKantoMountains();
     setupMountainSelect();
+    setupNavButtons();
     setupClickSelect();
     draw();
   } catch (err) {
