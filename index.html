@@ -140,22 +140,14 @@
       overflow-y: hidden;
       cursor: grab;
       touch-action: pan-x;
+      scrollbar-width: none;       /* Firefox */
+      -ms-overflow-style: none;    /* IE / Edge */
     }
 
     #scroll-container:active { cursor: grabbing; }
 
     #scroll-container::-webkit-scrollbar {
-      height: 10px;
-    }
-    #scroll-container::-webkit-scrollbar-track {
-      background: #dde8f0;
-    }
-    #scroll-container::-webkit-scrollbar-thumb {
-      background: rgba(50,100,170,0.5);
-      border-radius: 5px;
-    }
-    #scroll-container::-webkit-scrollbar-thumb:hover {
-      background: rgba(50,100,170,0.8);
+      display: none;               /* Chrome / Safari / スマートフォン */
     }
 
     #canvas-inner {
