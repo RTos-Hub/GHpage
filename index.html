@@ -84,6 +84,17 @@
       white-space: nowrap;
     }
 
+    /* スマートフォン（縦向き・横向きとも）: ツールバーを下端へ */
+    @media (max-width: 767px),
+           (orientation: landscape) and (max-height: 500px) {
+      #toolbar {
+        order: 3;
+        border-bottom: none;
+        border-top: 1px solid rgba(170,204,238,0.15);
+        padding-bottom: max(5px, env(safe-area-inset-bottom));
+      }
+    }
+
     /* スクロールバーを細く */
     #toolbar::-webkit-scrollbar { height: 3px; }
     #toolbar::-webkit-scrollbar-thumb { background: rgba(170,204,238,0.3); }
@@ -284,6 +295,47 @@
       cursor: default;
     }
 
+    /* ── 横向きガイド ──────────────────────── */
+    #landscape-hint {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 25, 55, 0.82);
+      z-index: 400;
+      cursor: pointer;
+      transition: opacity 0.6s;
+    }
+    #landscape-hint.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #landscape-hint .hint-box {
+      background: rgba(30, 60, 100, 0.95);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 10px;
+      padding: 28px 36px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    #landscape-hint .hint-icon {
+      font-size: 2.4rem;
+      line-height: 1;
+    }
+    #landscape-hint .hint-text {
+      font-size: 1.0rem;
+      color: var(--ui-accent);
+      letter-spacing: 0.08em;
+    }
+    #landscape-hint .hint-sub {
+      font-size: 0.72rem;
+      color: #8a9aaa;
+    }
+
     /* ── ツールチップ ───────────────────────── */
     #tooltip {
       position: fixed;
@@ -345,6 +397,14 @@
     </div>
   </div>
 
+</div>
+
+<div id="landscape-hint">
+  <div class="hint-box">
+    <div class="hint-icon">&#x21BB;</div>
+    <div class="hint-text">横向きの画面でご覧ください</div>
+    <div class="hint-sub">タップで閉じる</div>
+  </div>
 </div>
 
 <div id="tooltip"></div>
@@ -1003,9 +1063,10 @@ function setupClickSelect() {
     const px     = (clientX - rect.left) * scaleX;
     if (px < 0 || px > canvas.width) return;
 
-    // キャンバス上端 10% はツールバー誤操作防止のため無効
+    // キャンバス上端・下端 10% はツールバー誤操作防止のため無効
     const py = clientY - rect.top;
     if (py < rect.height * 0.10) return;
+    if (py > rect.height * 0.90) return;
 
     const stats  = gData.stats;
     const azMin  = stats.az_min - MARGIN_AZ;
@@ -1055,6 +1116,56 @@ async function init() {
 }
 
 init();
+
+// ── 横向きガイド ──────────────────────────────
+(function () {
+  const hint = document.getElementById("landscape-hint");
+  let dismissed = false;
+  let timer = null;
+
+  // スマートフォン縦向き判定（タブレット・PCは除外）
+  const mq = window.matchMedia(
+    "(pointer: coarse) and (orientation: portrait) and (max-width: 767px)"
+  );
+
+  function show() {
+    if (dismissed) return;
+    hint.classList.remove("hidden");
+    clearTimeout(timer);
+    timer = setTimeout(autoDismiss, 3000);
+  }
+
+  function hide() {
+    hint.classList.add("hidden");
+    clearTimeout(timer);
+  }
+
+  function autoDismiss() {
+    dismissed = true;
+    hide();
+  }
+
+  function dismiss() {
+    dismissed = true;
+    hide();
+  }
+
+  // 初期状態: 条件を満たさなければ最初から非表示
+  if (mq.matches) {
+    show();
+  } else {
+    hint.classList.add("hidden");
+  }
+
+  // 向き変更で再判定（縦→横で自動非表示、横→縦で再表示）
+  mq.addEventListener("change", function (e) {
+    if (e.matches) show(); else hide();
+  });
+
+  // タップ/クリックで手動に閉じる（以後は再表示しない）
+  hint.addEventListener("click", dismiss);
+  hint.addEventListener("touchend", function (e) { e.preventDefault(); dismiss(); });
+})();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(err => {
