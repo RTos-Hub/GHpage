@@ -53,6 +53,8 @@
       display: flex;
       align-items: baseline;
       gap: 14px;
+      user-select: none;
+      touch-action: manipulation;
     }
 
     #header h1 {
@@ -110,23 +112,6 @@
       color: var(--ui-accent);
       font-family: var(--font-mono);
       min-width: 2.8em;
-    }
-
-    /* ── ホバーオーバーレイ（キャンバス内） ── */
-    #hover-overlay {
-      position: absolute;
-      bottom: 20px;
-      left: 12px;
-      background: rgba(10, 25, 50, 0.72);
-      color: #a0c8ee;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      padding: 4px 10px;
-      border-radius: 4px;
-      pointer-events: none;
-      z-index: 10;
-      white-space: nowrap;
-      backdrop-filter: blur(2px);
     }
 
     /* ── キャンバスエリア ───────────────────── */
@@ -299,11 +284,6 @@
       cursor: default;
     }
 
-    /* タッチ端末: カーソル位置表示は不要なので非表示 */
-    @media (hover: none) {
-      #hover-overlay { display: none; }
-    }
-
     /* ── ツールチップ ───────────────────────── */
     #tooltip {
       position: fixed;
@@ -363,7 +343,6 @@
         <canvas id="main-canvas"></canvas>
       </div>
     </div>
-    <div id="hover-overlay">カーソルを稜線上に</div>
   </div>
 
 </div>
@@ -714,52 +693,6 @@ function drawPreserveCenter() {
 }
 
 // ═══════════════════════════════════════════════
-// ホバー：カーソル位置の方位角・仰角・距離を表示
-// ═══════════════════════════════════════════════
-function setupHover() {
-  const canvas        = document.getElementById("main-canvas");
-  const hoverOverlay  = document.getElementById("hover-overlay");
-
-  canvas.addEventListener("mousemove", e => {
-    if (!gData) return;
-    const rect   = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const px     = (e.clientX - rect.left) * scaleX;
-
-    const d      = gData;
-    const az     = d.horizon.azimuths;
-    const stats  = d.stats;
-
-    const azMin  = stats.az_min - MARGIN_AZ;
-    const azMax  = stats.az_max + MARGIN_AZ;
-    const azSpan = azMax - azMin;
-
-    const azAtCursor = azMin + (px / canvas.width) * azSpan;
-
-    // 最近傍インデックス
-    let nearest = 0;
-    let minDiff = Infinity;
-    for (let i = 0; i < az.length; i++) {
-      const diff = Math.abs(az[i] - azAtCursor);
-      if (diff < minDiff) { minDiff = diff; nearest = i; }
-    }
-
-    const ha    = d.horizon.horizon_angles;
-    const angle = ha[nearest];
-    const dist  = d.horizon.horizon_dists[nearest];
-    const azV   = az[nearest];
-
-    hoverOverlay.textContent =
-      `方位角: ${azV.toFixed(1)}°  仰角: ${angle !== null ? angle.toFixed(3) + "°" : "---"}  ` +
-      `距離: ${dist !== null ? dist.toFixed(1) + " km" : "---"}`;
-  });
-
-  canvas.addEventListener("mouseleave", () => {
-    hoverOverlay.textContent = "カーソルを稜線上に";
-  });
-}
-
-// ═══════════════════════════════════════════════
 // ピンチズーム（vscale 変更）
 // ═══════════════════════════════════════════════
 function setupPinchZoom() {
@@ -1050,6 +983,21 @@ function setupClickSelect() {
   function handleSelect(clientX, clientY) {
     if (!gData || gKantoMountains.length === 0) return;
 
+    // 山が選択中のとき: 画面左10% → 左の山, 画面右10% → 右の山
+    if (gSelectedMountain) {
+      const scRect = el.getBoundingClientRect();
+      const relX   = clientX - scRect.left;
+      const w      = scRect.width;
+      if (relX < w * 0.10) {
+        document.getElementById("mountain-prev").click();
+        return;
+      }
+      if (relX > w * 0.90) {
+        document.getElementById("mountain-next").click();
+        return;
+      }
+    }
+
     const rect   = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const px     = (clientX - rect.left) * scaleX;
@@ -1091,7 +1039,6 @@ async function init() {
     document.getElementById("loading").style.display = "none";
 
     setupControls();
-    setupHover();
     setupPinchZoom();
     setupWheelZoom();
     setupDragScroll();
