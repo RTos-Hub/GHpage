@@ -364,6 +364,8 @@
   </div>
 
   <div id="toolbar">
+    <button id="mountain-prev">◀ 左の山</button>
+    <button id="mountain-next">右の山 ▶</button>
     <div class="ctrl-group">
       <label>山名</label>
       <select id="mountain-select">
@@ -371,8 +373,6 @@
       </select>
       <button id="mountain-clear" title="選択解除">✕</button>
     </div>
-    <button id="mountain-prev">◀ 左の山</button>
-    <button id="mountain-next">右の山 ▶</button>
     <div class="ctrl-group">
       <label>横倍率</label>
       <input type="range" id="vscale" min="0.1" max="1" step="0.1" value="0.1">
@@ -998,13 +998,16 @@ function setupClickSelect() {
   // ── マウス：ドラッグと区別してクリック判定 ──
   let mouseDownX          = null;
   let mouseDownScrollLeft = null;
+  let lastTouchEndTime    = 0;   // タッチ後の合成mouseイベントを無視するため
 
   el.addEventListener("mousedown", e => {
+    if (Date.now() - lastTouchEndTime < 500) return;  // 合成イベント無視
     mouseDownX          = e.clientX;
     mouseDownScrollLeft = el.scrollLeft;
   });
 
   el.addEventListener("mouseup", e => {
+    if (Date.now() - lastTouchEndTime < 500) return;  // 合成イベント無視
     if (mouseDownX === null) return;
     const movedClient = Math.abs(e.clientX - mouseDownX);
     const movedScroll = Math.abs(el.scrollLeft - mouseDownScrollLeft);
@@ -1029,6 +1032,7 @@ function setupClickSelect() {
   }, { passive: true });
 
   el.addEventListener("touchend", e => {
+    lastTouchEndTime = Date.now();   // 合成mouseイベント抑制用
     if (touchStartX === null || touchWasMulti) { touchStartX = null; return; }
     if (e.changedTouches.length !== 1)          { touchStartX = null; return; }
     const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
