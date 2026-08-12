@@ -710,24 +710,24 @@ function draw() {
 
       // ラベル背景
       const lx = Math.min(x - labelW / 2, canvasW - labelW - 4);
-      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
       ctx.beginPath();
       ctx.roundRect(lx, labelTop, labelW, labelH, 3);
       ctx.fill();
-      ctx.strokeStyle = "rgba(180,180,180,0.6)";
+      ctx.strokeStyle = "rgba(180,180,180,0.35)";
       ctx.lineWidth   = 0.7;
       ctx.setLineDash([]);
       ctx.stroke();
 
       // ラベルテキスト
-      ctx.fillStyle   = "#1a1a1a";
+      ctx.fillStyle   = "#4a4a4a";
       ctx.textAlign   = "left";
       ctx.textBaseline = "top";
       for (let li = 0; li < lines.length; li++) {
         ctx.font = li === 0
           ? `bold ${fontSize}px 'Noto Serif JP', serif`
           : `${fontSize - 1}px 'Courier New'`;
-        ctx.fillStyle = li === 0 ? "#1a1a1a" : "#555555";
+        ctx.fillStyle = li === 0 ? "#4a4a4a" : "#777777";
         ctx.fillText(lines[li], lx + 6, labelTop + 4 + li * lineH);
       }
     }
