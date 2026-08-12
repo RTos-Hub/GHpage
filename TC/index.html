@@ -720,14 +720,14 @@ function draw() {
       ctx.stroke();
 
       // ラベルテキスト
-      ctx.fillStyle   = "#4a4a4a";
+      ctx.fillStyle   = "#1a1a1a";
       ctx.textAlign   = "left";
       ctx.textBaseline = "top";
       for (let li = 0; li < lines.length; li++) {
         ctx.font = li === 0
           ? `bold ${fontSize}px 'Noto Serif JP', serif`
           : `${fontSize - 1}px 'Courier New'`;
-        ctx.fillStyle = li === 0 ? "#4a4a4a" : "#777777";
+        ctx.fillStyle = li === 0 ? "#1a1a1a" : "#555555";
         ctx.fillText(lines[li], lx + 6, labelTop + 4 + li * lineH);
       }
     }
