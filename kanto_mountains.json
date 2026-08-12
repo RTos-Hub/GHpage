@@ -10,7 +10,7 @@
       220.0,
       340.0
     ],
-    "dist_max_km": 125.0,
+    "dist_max_km": 135.0,
     "elev_min_m": 590.0,
     "horizon_threshold": 0.9
   },
@@ -1687,7 +1687,7 @@
       "elev": 1292,
       "azimuth": 319.08,
       "distance_km": 105.5,
-      "angle_deg": 0.2635
+      "angle_deg": 0.2637
     },
     {
       "name": "榛名山・掃部ヶ岳",
@@ -1736,17 +1736,17 @@
     },
     {
       "name": "孫岳 まごだけ",
-      "lat": 36.479805,
-      "lon": 138.906147,
+      "lat": 36.479699,
+      "lon": 138.906058,
       "elev": 1272,
-      "azimuth": 322.52,
+      "azimuth": 322.51,
       "distance_km": 103.2,
       "angle_deg": 0.2767
     },
     {
       "name": "二ツ岳雄岳",
-      "lat": 36.4821,
-      "lon": 138.905366,
+      "lat": 36.482094,
+      "lon": 138.905433,
       "elev": 1340,
       "azimuth": 322.58,
       "distance_km": 103.4,
@@ -1754,12 +1754,30 @@
     },
     {
       "name": "二ツ岳雌岳",
-      "lat": 36.480724,
-      "lon": 138.909136,
+      "lat": 36.480649,
+      "lon": 138.908893,
       "elev": 1306,
-      "azimuth": 322.67,
+      "azimuth": 322.66,
       "distance_km": 103.1,
-      "angle_deg": 0.2965
+      "angle_deg": 0.2964
+    },
+    {
+      "name": "稲包山",
+      "lat": 36.74334,
+      "lon": 138.789991,
+      "elev": 1598,
+      "azimuth": 326.74,
+      "distance_km": 133.0,
+      "angle_deg": 0.1479
+    },
+    {
+      "name": "中之岳",
+      "lat": 36.587105,
+      "lon": 138.930727,
+      "elev": 1188,
+      "azimuth": 327.17,
+      "distance_km": 111.6,
+      "angle_deg": 0.1494
     },
     {
       "name": "小野子山",
@@ -1769,6 +1787,33 @@
       "azimuth": 327.22,
       "distance_km": 110.7,
       "angle_deg": 0.1682
+    },
+    {
+      "name": "三国山",
+      "lat": 36.772255,
+      "lon": 138.827692,
+      "elev": 1636,
+      "azimuth": 328.7,
+      "distance_km": 133.9,
+      "angle_deg": 0.1565
+    },
+    {
+      "name": "小出俣山",
+      "lat": 36.797357,
+      "lon": 138.889378,
+      "elev": 1749,
+      "azimuth": 331.34,
+      "distance_km": 133.5,
+      "angle_deg": 0.2085
+    },
+    {
+      "name": "川棚ノ頭",
+      "lat": 36.816048,
+      "lon": 138.903731,
+      "elev": 1846,
+      "azimuth": 332.24,
+      "distance_km": 134.7,
+      "angle_deg": 0.2382
     },
     {
       "name": "荒山",
@@ -1823,6 +1868,15 @@
       "azimuth": 337.79,
       "distance_km": 98.0,
       "angle_deg": 0.6588
+    },
+    {
+      "name": "獅子ヶ鼻山",
+      "lat": 36.797035,
+      "lon": 139.11287,
+      "elev": 1875,
+      "azimuth": 339.35,
+      "distance_km": 125.0,
+      "angle_deg": 0.3489
     },
     {
       "name": "剣ヶ峰山",
