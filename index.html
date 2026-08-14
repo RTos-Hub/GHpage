@@ -187,8 +187,8 @@
       color: #4a6a8a;
     }
 
-    /* ── 地図ボタン ─────────────────────────── */
-    #map-btn {
+    /* ── 地図ボタン／クレジットボタン ───────────── */
+    #map-btn, #credit-btn {
       background: rgba(100,150,200,0.25);
       border: 1px solid rgba(170,204,238,0.4);
       color: var(--ui-accent);
@@ -198,9 +198,8 @@
       font-size: 0.74rem;
       font-family: var(--font-main);
       flex-shrink: 0;
-      margin-left: 86px;
     }
-    #map-btn:hover { background: rgba(100,150,200,0.5); }
+    #map-btn:hover, #credit-btn:hover { background: rgba(100,150,200,0.5); }
 
     /* ── 地図オーバーレイ ───────────────────── */
     #map-overlay {
@@ -330,6 +329,64 @@
       color: #8a9aaa;
     }
 
+    /* ── クレジットオーバーレイ ─────────────── */
+    #credit-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 20px;
+    }
+    #credit-overlay.visible { display: flex; }
+    #credit-box {
+      background: rgba(250,250,248,0.98);
+      color: #222;
+      max-width: 480px;
+      width: 100%;
+      max-height: 80vh;
+      max-height: 80dvh;
+      overflow-y: auto;
+      border-radius: 8px;
+      padding: 22px 26px;
+      position: relative;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.6);
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+    #credit-box h2 {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      color: #2a4a6a;
+    }
+    #credit-box h3 {
+      font-size: 0.82rem;
+      margin: 14px 0 4px;
+      color: #3a5878;
+    }
+    #credit-box p { margin: 2px 0; }
+    #credit-box a { color: #2266bb; }
+    #credit-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: rgba(0,0,0,0.06);
+      border: none;
+      color: #333;
+      font-size: 1.2rem;
+      line-height: 1;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #credit-close:hover { background: rgba(0,0,0,0.14); }
+
     /* ── ツールチップ ───────────────────────── */
     #tooltip {
       position: fixed;
@@ -353,7 +410,7 @@
 
   <div id="header">
     <h1>山の端</h1>
-    <span class="subtitle">東京北部（35.744°N 139.607°E）から見た西方の稜線</span>
+    <span class="subtitle">東京都庁展望室（35.690°N 139.692°E、標高239.7m）から見た西方の稜線</span>
   </div>
 
   <div id="toolbar">
@@ -367,6 +424,7 @@
       <button id="mountain-clear" title="選択解除">✕</button>
     </div>
     <button id="map-btn">地図</button>
+    <button id="credit-btn">クレジット</button>
     <div class="ctrl-group">
       <label>横倍率</label>
       <input type="range" id="vscale" min="0.1" max="1" step="0.1" value="0.1">
@@ -391,6 +449,21 @@
     </div>
   </div>
 
+</div>
+
+<div id="credit-overlay">
+  <div id="credit-box">
+    <button id="credit-close">&#x2715;</button>
+    <h2>出典・データについて</h2>
+    <h3>標高データ（地平線計算用 DEM）</h3>
+    <p>SRTM data courtesy of the U.S. Geological Survey and NASA</p>
+    <p>配信: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a>（Mapzen由来、CC BY 4.0）</p>
+    <h3>山頂位置情報</h3>
+    <p>山頂の緯度・経度・標高は、国土地理院の基準点データを参考に作成しました。</p>
+    <p>出典: <a href="https://www.gsi.go.jp/" target="_blank" rel="noopener">国土地理院ウェブサイト</a></p>
+    <h3>計算方法</h3>
+    <p>大円距離・地球曲率・大気屈折補正（屈折係数 k = 0.13）を考慮した独自計算により、地平線仰角プロファイルを算出しています。</p>
+  </div>
 </div>
 
 <div id="landscape-hint">
@@ -637,11 +710,11 @@ function draw() {
 
       // ラベル背景
       const lx = Math.min(x - labelW / 2, canvasW - labelW - 4);
-      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
       ctx.beginPath();
       ctx.roundRect(lx, labelTop, labelW, labelH, 3);
       ctx.fill();
-      ctx.strokeStyle = "rgba(180,180,180,0.6)";
+      ctx.strokeStyle = "rgba(180,180,180,0.35)";
       ctx.lineWidth   = 0.7;
       ctx.setLineDash([]);
       ctx.stroke();
@@ -868,6 +941,18 @@ function setupControls() {
   });
   mapOverlay.addEventListener("click", e => {
     if (e.target === mapOverlay) mapOverlay.classList.remove("visible");
+  });
+
+  // クレジットオーバーレイ
+  const creditOverlay = document.getElementById("credit-overlay");
+  document.getElementById("credit-btn").addEventListener("click", () => {
+    creditOverlay.classList.add("visible");
+  });
+  document.getElementById("credit-close").addEventListener("click", () => {
+    creditOverlay.classList.remove("visible");
+  });
+  creditOverlay.addEventListener("click", e => {
+    if (e.target === creditOverlay) creditOverlay.classList.remove("visible");
   });
 
   window.addEventListener("resize", () => { updateCanvasHeight(); drawPreserveCenter(); });
