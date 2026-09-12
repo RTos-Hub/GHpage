@@ -508,6 +508,25 @@ const DEG_PER_PX_BASE = 1 / 80;   // 80px = 1度 が基準
 const MARGIN_AZ    = 1.0;   // 左右
 const MARGIN_ANGLE = 0.3;   // 上下
 
+// 横倍率（gVscale）スライダーの範囲（#vscale の min/max と合わせる）
+const MIN_VSCALE = 0.1;
+const MAX_VSCALE = 1.0;
+
+// 稜線下グラデーション（空気遠近法）
+const HAZE_NEAR_RGB = [30, 42, 54];     // 近景: 濃い青灰色
+const HAZE_FAR_RGB  = [120, 138, 152];  // 遠景: 霞んだ、やや暗めの色
+const HAZE_DECAY_M  = 45000;            // 減衰の特性距離 [m]（大きいほど霞みにくい）
+
+// 距離 [m] → 稜線の塗り色（指数減衰による空気遠近法）
+function hazeColor(distM) {
+  const d = isFinite(distM) ? Math.max(0, distM) : 0;
+  const t = 1 - Math.exp(-d / HAZE_DECAY_M);
+  const r = HAZE_NEAR_RGB[0] + (HAZE_FAR_RGB[0] - HAZE_NEAR_RGB[0]) * t;
+  const g = HAZE_NEAR_RGB[1] + (HAZE_FAR_RGB[1] - HAZE_NEAR_RGB[1]) * t;
+  const b = HAZE_NEAR_RGB[2] + (HAZE_FAR_RGB[2] - HAZE_NEAR_RGB[2]) * t;
+  return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
+}
+
 // ═══════════════════════════════════════════════
 // グローバル状態
 // ═══════════════════════════════════════════════
@@ -516,6 +535,7 @@ let gVscale           = 0.1;
 let gKantoMountains   = [];
 let gSelectedMountain = null;
 let gScale            = null;   // draw() が保存するスケール情報
+let gRidgeCache       = null;   // 稜線塗りつぶしの事前描画キャッシュ
 
 // ═══════════════════════════════════════════════
 // ユーティリティ
@@ -535,6 +555,132 @@ function updateCanvasHeight() {
   wrapper.style.height = Math.min(desiredH, Math.max(50, availH)) + "px";
 }
 
+// ═══════════════════════════════════════════════
+// 稜線塗りつぶしの事前描画キャッシュ
+// ═══════════════════════════════════════════════
+// breakpoints を使った塗りつぶしは1画素ごとにグラデーションを作るため重いが、
+// 横倍率（gVscale）を変えてもキャンバスの「高さ」は常にウィンドウ高さ
+// （canvasH）で固定であり、横倍率が変わるのは「幅」だけ。
+// そこで横倍率が最大（＝等スケール、canvasW が最大になる状態）の塗りつぶし
+// 画像を一度だけ生成してオフスクリーンにキャッシュしておき、実際の描画では
+// それを drawImage で横方向にだけ縮小して使う。
+// 再生成が必要なのはウィンドウの高さが変わった時（＝リサイズ）だけで、
+// ピンチズーム・ホイール・横倍率スライダーの操作では再生成しない。
+function buildRidgeCache(canvasH, angleMin, angleMax, angleSpan, azMin, azSpan, az, ha, hd, bps) {
+  const baseDegPx   = canvasH / angleSpan;             // gVscale = 1.0 相当
+  const baseCanvasW = Math.max(1, Math.round(azSpan * baseDegPx));
+
+  const off = document.createElement("canvas");
+  off.width  = baseCanvasW;
+  off.height = canvasH;
+  const ctx  = off.getContext("2d");
+
+  const azToPx = a   => (a   - azMin)    / azSpan * baseCanvasW;
+  const anToPx = ang => (1 - (ang - angleMin) / angleSpan) * canvasH;
+
+  // ── 空グラデーション ──────────────────────
+  // 稜線から上を透明のまま残すと、縮小（ミップ生成・表示時とも）の際に
+  // 山の輪郭が半透明のフリンジ（にじみ）を出してしまう。draw() 側と同じ
+  // 空グラデーションをあらかじめ塗っておき、常に不透明同士の合成にする。
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvasH);
+  skyGrad.addColorStop(0,    "#2266bb");
+  skyGrad.addColorStop(0.55, "#6699cc");
+  skyGrad.addColorStop(0.85, "#99bbdd");
+  skyGrad.addColorStop(1.0,  "#e8f4f8");
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, baseCanvasW, canvasH);
+
+  // ── 稜線 塗りつぶし（距離に応じた空気遠近法グラデーション）──
+  const rawMax = Math.max(...ha.filter(v => v !== null && isFinite(v)));
+  const fallbackGrad = ctx.createLinearGradient(0, anToPx(rawMax), 0, canvasH);
+  fallbackGrad.addColorStop(0,   "#3a5060");
+  fallbackGrad.addColorStop(0.4, "#506878");
+  fallbackGrad.addColorStop(1.0, "#2a3a4a");
+
+  const AZ_STEP2 = az.length > 1 ? (az[az.length - 1] - az[0]) / (az.length - 1) : 1;
+  const interpAt = (arr, azVal) => {
+    const fi = (azVal - az[0]) / AZ_STEP2;
+    const i0 = Math.max(0, Math.min(az.length - 1, Math.floor(fi)));
+    const i1 = Math.min(az.length - 1, i0 + 1);
+    const v0 = arr[i0], v1 = arr[i1];
+    if (v0 === null || v0 === undefined) return v1 ?? null;
+    if (v1 === null || v1 === undefined) return v0;
+    const t = fi - i0;
+    return v0 + (v1 - v0) * t;
+  };
+  const nearestIdx = azVal =>
+    Math.max(0, Math.min(az.length - 1, Math.round((azVal - az[0]) / AZ_STEP2)));
+
+  const xStart = Math.max(0, Math.floor(azToPx(az[0])));
+  const xEnd   = Math.min(baseCanvasW, Math.ceil(azToPx(az[az.length - 1])));
+  for (let x = xStart; x < xEnd; x++) {
+    const azVal = azMin + (x + 0.5) / baseCanvasW * azSpan;
+    const haX = interpAt(ha, azVal);
+    if (haX === null) continue;
+
+    const yTop = anToPx(haX);
+    if (yTop >= canvasH) continue;
+
+    const colBps = bps ? bps[nearestIdx(azVal)] : null;
+
+    if (colBps && colBps.length) {
+      const n = colBps.length;
+      const grad = ctx.createLinearGradient(0, yTop, 0, canvasH);
+      const offsetOf = elevDeg =>
+        Math.min(1, Math.max(0, (anToPx(elevDeg) - yTop) / (canvasH - yTop)));
+
+      // 最も遠いブレークポイント（頂上）から最も近いブレークポイント（麓）へ、
+      // 各点の仰角位置に色ストップを置いてなだらかに繋ぐ
+      grad.addColorStop(0, hazeColor(colBps[n - 1][1] * 1000));
+      let prevOffset = 0;
+      for (let k = n - 2; k >= 0; k--) {
+        const offset = Math.max(prevOffset, offsetOf(colBps[k][0]));
+        grad.addColorStop(offset, hazeColor(colBps[k][1] * 1000));
+        prevOffset = offset;
+      }
+      grad.addColorStop(1, hazeColor(colBps[0][1] * 1000));
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = fallbackGrad;
+    }
+    ctx.fillRect(x, yTop, 1, canvasH - yTop);
+  }
+
+  // 横倍率スライダーは 0.1〜1.0 の範囲なので、この画像を表示時に最大で
+  // 約10倍縮小することになる。1回の drawImage でそこまで大きく縮小すると、
+  // ブラウザの縮小フィルタが追いつかずモアレ状のノイズが出やすいため、
+  // 半分ずつ段階的に縮小した版（ミップマップ）をあらかじめ用意しておき、
+  // 表示時は目的のサイズに最も近い（2倍以内の）版から最後の1回だけ縮小する。
+  const mips = [{ width: baseCanvasW, canvas: off }];
+  const minWidth = Math.max(1, Math.round(baseCanvasW * MIN_VSCALE));
+  let curCanvas = off;
+  let curWidth  = baseCanvasW;
+  while (curWidth > minWidth) {
+    const nextWidth = Math.max(minWidth, Math.round(curWidth / 2));
+    const nextCanvas = document.createElement("canvas");
+    nextCanvas.width  = nextWidth;
+    nextCanvas.height = canvasH;
+    const nctx = nextCanvas.getContext("2d");
+    nctx.imageSmoothingEnabled = true;
+    nctx.imageSmoothingQuality = "high";
+    nctx.drawImage(curCanvas, 0, 0, curWidth, canvasH, 0, 0, nextWidth, canvasH);
+    mips.push({ width: nextWidth, canvas: nextCanvas });
+    curCanvas = nextCanvas;
+    curWidth  = nextWidth;
+  }
+
+  return { canvasH, azSpan, baseCanvasW, mips };
+}
+
+// mips（大きい順に並んだ縮小版の配列）から、目的の幅に最も近い
+// （かつ目的の幅以上の）版を選ぶ。最終的な drawImage の縮小率を
+// 2倍未満に抑え、画質を保つのが目的。
+function pickMipLevel(mips, targetWidth) {
+  for (let i = mips.length - 1; i >= 0; i--) {
+    if (mips[i].width >= targetWidth) return mips[i];
+  }
+  return mips[0];
+}
 
 // ═══════════════════════════════════════════════
 // 描画
@@ -546,6 +692,7 @@ function draw() {
   const az     = d.horizon.azimuths;
   const ha_raw = d.horizon.horizon_angles;
   const hd     = d.horizon.horizon_dists;
+  const bps    = d.horizon.breakpoints || null;
   const stats  = d.stats;
 
   // 平滑化
@@ -572,6 +719,12 @@ function draw() {
   const azMin  = stats.az_min - MARGIN_AZ;
   const azMax  = stats.az_max + MARGIN_AZ;
   const azSpan = azMax - azMin;
+
+  // 稜線塗りつぶしは重いので、ウィンドウの高さが変わらない限り
+  // 作り直さない（横倍率だけの変更では再生成しない）
+  if (!gRidgeCache || gRidgeCache.canvasH !== canvasH || gRidgeCache.azSpan !== azSpan) {
+    gRidgeCache = buildRidgeCache(canvasH, angleMin, angleMax, angleSpan, azMin, azSpan, az, ha, hd, bps);
+  }
 
   // 横幅（縦と同じ degPx を使う → 等スケール）
   const canvasW = Math.round(azSpan * degPx);
@@ -602,7 +755,22 @@ function draw() {
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, canvasW, effectiveH);
 
+  // ── 稜線 塗りつぶし ── 事前描画キャッシュを横方向にだけ縮小して描く
+  // （高さは常に canvasH = effectiveH と一致するため、縦方向の拡縮は発生しない）。
+  // 目的の幅に最も近い（2倍以内の）ミップ版から描くことで、大きな縮小率
+  // による縮小フィルタのモアレ状ノイズを避ける。
+  const mip = pickMipLevel(gRidgeCache.mips, canvasW);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(
+    mip.canvas,
+    0, 0, mip.width, gRidgeCache.canvasH,
+    0, 0, canvasW, effectiveH
+  );
+
   // ── 方位角ラベル（上端）────────────────────
+  // 稜線塗りつぶしのキャッシュ画像は空（稜線より上）も不透明で描かれるため、
+  // 目盛りラベル類は塗りつぶしより後に描いて上に重ねる
   const compassMap = {
     225: "南西", 247.5: "西南西", 270: "西",
     292.5: "西北西", 315: "北西",  337.5: "北北西"
@@ -659,31 +827,11 @@ function draw() {
   }
   ctx.restore();
 
-  // ── 稜線 塗りつぶし ───────────────────────
-  const grad = ctx.createLinearGradient(0, anToPx(rawMax), 0, effectiveH);
-  grad.addColorStop(0,   "#3a5060");
-  grad.addColorStop(0.4, "#506878");
-  grad.addColorStop(1.0, "#2a3a4a");
-
+  // ── 稜線ライン ────────────────────────────
+  // 細い線なので横圧縮でつぶれないよう、キャッシュ画像にはせず毎回ライブの
+  // 解像度で直接描く（塗りつぶしと違って負荷は軽い）
   ctx.beginPath();
   let first = true;
-  for (let i = 0; i < az.length; i++) {
-    if (ha[i] === null) continue;
-    const x = azToPx(az[i]);
-    const y = anToPx(ha[i]);
-    if (first) { ctx.moveTo(x, y); first = false; }
-    else        { ctx.lineTo(x, y); }
-  }
-  // 下端へ閉じる
-  ctx.lineTo(azToPx(az[az.length - 1]), effectiveH);
-  ctx.lineTo(azToPx(az[0]), effectiveH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // ── 稜線ライン ────────────────────────────
-  ctx.beginPath();
-  first = true;
   for (let i = 0; i < az.length; i++) {
     if (ha[i] === null) continue;
     const x = azToPx(az[i]);
@@ -851,6 +999,18 @@ function drawPreserveCenter() {
   }
 }
 
+// ピンチズーム・ホイール・スライダー操作は短時間に何度も発火するため、
+// draw() の呼び出しを1フレームに1回へ間引く（描画内容自体は一切変えない）
+let gDrawScheduled = false;
+function scheduleDrawPreserveCenter() {
+  if (gDrawScheduled) return;
+  gDrawScheduled = true;
+  requestAnimationFrame(() => {
+    gDrawScheduled = false;
+    drawPreserveCenter();
+  });
+}
+
 // ═══════════════════════════════════════════════
 // ピンチズーム（vscale 変更）
 // ═══════════════════════════════════════════════
@@ -882,7 +1042,7 @@ function setupPinchZoom() {
     const vval    = document.getElementById("vscale-val");
     vslider.value     = newScale;
     vval.textContent  = "×" + newScale.toFixed(2);
-    drawPreserveCenter();
+    scheduleDrawPreserveCenter();
   }, { passive: false });
 
   el.addEventListener("touchend", e => {
@@ -908,7 +1068,7 @@ function setupWheelZoom() {
     gVscale = Math.round(Math.min(1.0, Math.max(0.1, gVscale + delta)) * 10) / 10;
     vslider.value    = gVscale;
     vval.textContent = "×" + gVscale.toFixed(1);
-    drawPreserveCenter();
+    scheduleDrawPreserveCenter();
   }, { passive: false });
 }
 
@@ -946,7 +1106,7 @@ function setupControls() {
   vslider.addEventListener("input", () => {
     gVscale = parseFloat(vslider.value);
     vval.textContent = "×" + gVscale.toFixed(1);
-    drawPreserveCenter();
+    scheduleDrawPreserveCenter();
   });
 
   // 地図オーバーレイ
@@ -973,9 +1133,9 @@ function setupControls() {
     if (e.target === creditOverlay) creditOverlay.classList.remove("visible");
   });
 
-  window.addEventListener("resize", () => { updateCanvasHeight(); drawPreserveCenter(); });
+  window.addEventListener("resize", () => { updateCanvasHeight(); scheduleDrawPreserveCenter(); });
   if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", () => { updateCanvasHeight(); drawPreserveCenter(); });
+    window.visualViewport.addEventListener("resize", () => { updateCanvasHeight(); scheduleDrawPreserveCenter(); });
   }
 }
 
