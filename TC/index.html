@@ -299,10 +299,13 @@
       user-select: none;
       touch-action: manipulation;
     }
-    #mountain-prev:hover:not(:disabled), #mountain-next:hover:not(:disabled) {
+    #mountain-prev:hover:not(.nav-disabled), #mountain-next:hover:not(.nav-disabled) {
       background: rgba(100,150,200,0.5);
     }
-    #mountain-prev:disabled, #mountain-next:disabled {
+    /* iOS Safari では disabled 属性を付けるとボタンがタッチイベント配送の
+       対象から外れ、touch-action が効かなくなって連打時に誤ってピンチズーム
+       扱いされる不具合があるため、実際には disabled にせず見た目だけ変える */
+    #mountain-prev.nav-disabled, #mountain-next.nav-disabled {
       opacity: 0.35;
       cursor: default;
     }
@@ -1210,8 +1213,12 @@ function updateNavButtons() {
   const prev = document.getElementById("mountain-prev");
   const next = document.getElementById("mountain-next");
   const idx  = parseInt(sel.value, 10);
-  prev.disabled = !isNaN(idx) && idx === 0;
-  next.disabled = !isNaN(idx) && idx === gKantoMountains.length - 1;
+  const prevDisabled = !isNaN(idx) && idx === 0;
+  const nextDisabled = !isNaN(idx) && idx === gKantoMountains.length - 1;
+  prev.classList.toggle("nav-disabled", prevDisabled);
+  next.classList.toggle("nav-disabled", nextDisabled);
+  prev.setAttribute("aria-disabled", prevDisabled);
+  next.setAttribute("aria-disabled", nextDisabled);
 }
 
 function setupNavButtons() {
