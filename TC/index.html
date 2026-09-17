@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1a1a2e">
@@ -52,6 +52,7 @@
       color: var(--ui-text);
       font-family: var(--font-main);
       overflow: hidden;
+      touch-action: manipulation;
     }
 
     /* ── レイアウト ─────────────────────────── */
@@ -495,6 +496,12 @@
 <div id="tooltip"></div>
 
 <script>
+// iOS Safari はピンチズームを touch-action とは別の gesture イベントで扱うため、
+// ボタン連打時に指がずれてピンチと誤認識されないよう明示的に無効化する。
+["gesturestart", "gesturechange", "gestureend"].forEach(type => {
+  document.addEventListener(type, e => e.preventDefault());
+});
+
 // ═══════════════════════════════════════════════
 // 定数
 // ═══════════════════════════════════════════════
