@@ -31,6 +31,14 @@
     /* ── リセット・基礎 ─────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* iOS Safari: ボタン連打時に「コピー」等のテキスト選択吹き出しが
+       出ないよう、全ボタンで長押しコールアウトと文字選択を無効化 */
+    button {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
     :root {
       --sky-top:    #2266bb;
       --sky-mid:    #6699cc;
@@ -73,6 +81,8 @@
       align-items: baseline;
       gap: 14px;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
       touch-action: manipulation;
     }
 
@@ -101,6 +111,9 @@
       font-size: 0.74rem;
       overflow-x: auto;
       white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
       touch-action: manipulation;
     }
 
@@ -301,7 +314,6 @@
       font-family: var(--font-main);
       flex-shrink: 0;
       white-space: nowrap;
-      user-select: none;
       touch-action: manipulation;
     }
     #mountain-prev:hover:not(.nav-disabled), #mountain-next:hover:not(.nav-disabled) {
