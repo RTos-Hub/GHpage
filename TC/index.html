@@ -189,21 +189,26 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #dde8f0;
+      background: linear-gradient(180deg, #1e3c64 0%, #2a4a72 100%);
       gap: 16px;
       z-index: 100;
     }
 
     #loading .kanji {
       font-size: 3rem;
-      color: #2266bb;
+      color: var(--ui-accent);
       letter-spacing: 0.3em;
       opacity: 0.8;
     }
 
     #loading .msg {
       font-size: 0.85rem;
-      color: #4a6a8a;
+      color: #9ab0c8;
+    }
+
+    #loading .note {
+      font-size: 0.72rem;
+      color: #6f88a2;
     }
 
     /* ── 地図ボタン／クレジットボタン ───────────── */
@@ -462,7 +467,8 @@
   <div id="canvas-wrapper">
     <div id="loading">
       <div class="kanji">山の端</div>
-      <div class="msg">horizon_export.json を読み込み中...</div>
+      <div class="msg">データ読み込み中...</div>
+      <div class="note">通信環境によっては時間がかかる場合があります</div>
     </div>
     <div id="scroll-container">
       <div id="canvas-inner">
@@ -1404,6 +1410,7 @@ async function init() {
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
       `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
+    document.querySelector("#loading .note").style.display = "none";
     console.error(err);
   }
 }
