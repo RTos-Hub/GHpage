@@ -117,6 +117,10 @@
       touch-action: manipulation;
     }
 
+    /* iOS Safari は親の touch-action だけではテキスト要素のダブルタップ
+       ズームを止められないため、子要素にも明示する */
+    #header *, #toolbar * { touch-action: manipulation; }
+
     /* スマートフォン（縦向き・横向きとも）: ツールバーを下端へ */
     @media (max-width: 767px),
            (orientation: landscape) and (max-height: 500px) {
@@ -528,6 +532,18 @@
 ["gesturestart", "gesturechange", "gestureend"].forEach(type => {
   document.addEventListener(type, e => e.preventDefault());
 });
+
+// ヘッダー・ツールバーの説明テキスト（ラベル等）のダブルタップズームを抑止する。
+// 操作要素（ボタン・入力）は連打が正常動作なので対象外。
+let lastTextTapAt = 0;
+document.addEventListener("touchend", e => {
+  const t = e.target;
+  if (!t.closest("#header, #toolbar")) return;
+  if (t.closest("button, input, select, option")) return;
+  const now = Date.now();
+  if (now - lastTextTapAt < 350) e.preventDefault();
+  lastTextTapAt = now;
+}, { passive: false });
 
 // ═══════════════════════════════════════════════
 // 定数
