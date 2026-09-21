@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yamanoha-tc-v1';
+const CACHE_NAME = 'yamanoha-tc-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -36,6 +36,26 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // データ JSON（horizon_export.json / kanto_mountains.json）はネットワーク優先。
+  // index.html は "?v=<時刻>" を付けて取得するためキャッシュのキーと一致しない。
+  // そこでクエリを除いた URL をキーにして保存・参照し、オフライン時は直近の取得結果を返す。
+  const url = new URL(event.request.url);
+  if (url.origin === self.location.origin && url.pathname.endsWith('.json')) {
+    const cacheKey = url.origin + url.pathname;
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(cacheKey, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(cacheKey).then(cached => cached || Response.error()))
     );
     return;
   }
