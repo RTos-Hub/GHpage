@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- 検索エンジン向け基本設定 -->
+  <title>練馬区役所展望ロビーから見える山並みシミュレーター | 地形データ再現</title>
+  <meta name="description" content="練馬区役所の展望ロビーから見える富士山や奥多摩などの山並みを地形データから再現したWebツール。視覚的に山の名前や配置を確認できます。">
+  <meta name="keywords" content="練馬区役所,展望ロビー,山,稜線,地形データ">
+
+  <meta name="google-site-verification" content="5EFQY2j4xA6YwSnMCd0jZUmXuqOqqt65Y9Ba-PZkMbk" />
+
+  <!-- OGP (Open Graph Protocol) -->
+  <meta property="og:title" content="練馬区役所展望ロビーからの山並みシミュレーター">
+  <meta property="og:description" content="練馬区役所展望ロビーから見える稜線を地形データより再現.スマホ対応,タップで山名,両端タップで山移動,ピンチで倍率変更,ドラッグで方位変更.">
+  <meta property="og:image" content="https://rtos-hub.github.io/GHpage/NC/ogp.png">
+  <meta property="og:url" content="https://rtos-hub.github.io/GHpage/NC/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    /* ── リセット・基礎 ─────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* iOS Safari: ボタン連打時に「コピー」等のテキスト選択吹き出しが
+       出ないよう、全ボタンで長押しコールアウトと文字選択を無効化 */
+    button {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    :root {
+      --sky-top:    #2266bb;
+      --sky-mid:    #6699cc;
+      --sky-horiz:  #e8f4f8;
+      --mountain:   #3a5060;
+      --mountain2:  #506878;
+      --label-bg:   rgba(255,255,255,0.88);
+      --label-line: #c04444;
+      --ui-bg:      rgba(30, 60, 100, 0.88);
+      --ui-text:    #e8f4ff;
+      --ui-accent:  #aaccee;
+      --font-main:  'Noto Serif JP', 'Georgia', serif;
+      --font-mono:  'Courier New', monospace;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: rgb(30, 60, 100);
+      color: var(--ui-text);
+      font-family: var(--font-main);
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    /* ── レイアウト ─────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;    /* fallback: dvh 非対応ブラウザ用 */
+      height: 100dvh;   /* モバイル: アドレスバーの出入りに追従 */
+    }
+
+    /* ── ヘッダー ───────────────────────────── */
+    #header {
+      flex-shrink: 0;
+      padding: 4px 14px;
+      background: var(--ui-bg);
+      border-bottom: 1px solid rgba(170,204,238,0.3);
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    #header h1 {
+      font-size: 1.0rem;
+      letter-spacing: 0.12em;
+      color: var(--ui-accent);
+      font-weight: 400;
+    }
+
+    #header .subtitle {
+      font-size: 0.70rem;
+      color: #8a9aaa;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── ツールバー ─────────────────────────── */
+    #toolbar {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      background: rgba(30,60,100,0.92);
+      border-bottom: 1px solid rgba(170,204,238,0.15);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.74rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    /* iOS Safari は親の touch-action だけではテキスト要素のダブルタップ
+       ズームを止められないため、子要素にも明示する */
+    #header *, #toolbar * { touch-action: manipulation; }
+
+    /* スマートフォン（縦向き・横向きとも）: ツールバーを下端へ */
+    @media (max-width: 767px),
+           (orientation: landscape) and (max-height: 500px) {
+      #toolbar {
+        order: 3;
+        border-bottom: none;
+        border-top: 1px solid rgba(170,204,238,0.15);
+        padding-bottom: max(5px, env(safe-area-inset-bottom));
+      }
+    }
+
+    /* スクロールバーを細く */
+    #toolbar::-webkit-scrollbar { height: 3px; }
+    #toolbar::-webkit-scrollbar-thumb { background: rgba(170,204,238,0.3); }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #8a9aaa;
+      flex-shrink: 0;
+    }
+
+    .ctrl-group label { white-space: nowrap; }
+
+    .ctrl-group input[type=range] {
+      width: 80px;
+      accent-color: var(--ui-accent);
+    }
+
+    .ctrl-group input[type=checkbox] {
+      accent-color: var(--ui-accent);
+      width: 13px; height: 13px;
+    }
+
+    .val-display {
+      color: var(--ui-accent);
+      font-family: var(--font-mono);
+      min-width: 2.8em;
+    }
+
+    /* ── キャンバスエリア ───────────────────── */
+    #canvas-wrapper {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #scroll-container {
+      width: 100%;
+      height: 100%;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      cursor: grab;
+      touch-action: pan-x;
+      scrollbar-width: none;       /* Firefox */
+      -ms-overflow-style: none;    /* IE / Edge */
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #scroll-container:active { cursor: grabbing; }
+
+    #scroll-container::-webkit-scrollbar {
+      display: none;               /* Chrome / Safari / スマートフォン */
+    }
+
+    #canvas-inner {
+      height: 100%;
+      /* width は JS で設定 */
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      height: 100%;
+      /* width は JS で設定 */
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ── ローディング ───────────────────────── */
+    #loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #1e3c64 0%, #2a4a72 100%);
+      gap: 16px;
+      z-index: 100;
+    }
+
+    #loading .kanji {
+      font-size: 3rem;
+      color: var(--ui-accent);
+      letter-spacing: 0.3em;
+      opacity: 0.8;
+    }
+
+    #loading .msg {
+      font-size: 0.85rem;
+      color: #9ab0c8;
+    }
+
+    #loading .note {
+      font-size: 0.72rem;
+      color: #6f88a2;
+    }
+
+    /* ── 地図ボタン／クレジットボタン ───────────── */
+    #map-btn, #credit-btn {
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      flex-shrink: 0;
+    }
+    #map-btn:hover, #credit-btn:hover { background: rgba(100,150,200,0.5); }
+
+    /* ── 地図オーバーレイ ───────────────────── */
+    #map-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    #map-overlay.visible { display: flex; }
+    #map-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      max-height: 90dvh;
+      border-radius: 4px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.9);
+    }
+    #map-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #map-close:hover { background: rgba(255,255,255,0.30); }
+
+    /* ── 山選択 ─────────────────────────────── */
+    #mountain-select {
+      background: rgba(10, 30, 65, 0.92);
+      color: var(--ui-accent);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 3px;
+      padding: 2px 4px;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      max-width: 145px;
+    }
+    #mountain-select option {
+      background: #0d1e38;
+      color: #c8e0f4;
+    }
+    #mountain-clear {
+      background: none;
+      border: 1px solid rgba(170,204,238,0.3);
+      color: #8a9aaa;
+      border-radius: 3px;
+      padding: 1px 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+    #mountain-clear:hover { color: var(--ui-accent); border-color: var(--ui-accent); }
+
+    #mountain-prev, #mountain-next {
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+      flex-shrink: 0;
+      white-space: nowrap;
+      touch-action: manipulation;
+    }
+    #mountain-prev:hover:not(.nav-disabled), #mountain-next:hover:not(.nav-disabled) {
+      background: rgba(100,150,200,0.5);
+    }
+    /* iOS Safari では disabled 属性を付けるとボタンがタッチイベント配送の
+       対象から外れ、touch-action が効かなくなって連打時に誤ってピンチズーム
+       扱いされる不具合があるため、実際には disabled にせず見た目だけ変える */
+    #mountain-prev.nav-disabled, #mountain-next.nav-disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* ── 横向きガイド ──────────────────────── */
+    #landscape-hint {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 25, 55, 0.82);
+      z-index: 400;
+      cursor: pointer;
+      transition: opacity 0.6s;
+    }
+    #landscape-hint.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #landscape-hint .hint-box {
+      background: rgba(30, 60, 100, 0.95);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 10px;
+      padding: 28px 36px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    #landscape-hint .hint-icon {
+      font-size: 2.4rem;
+      line-height: 1;
+    }
+    #landscape-hint .hint-text {
+      font-size: 1.0rem;
+      color: var(--ui-accent);
+      letter-spacing: 0.08em;
+    }
+    #landscape-hint .hint-sub {
+      font-size: 0.72rem;
+      color: #8a9aaa;
+    }
+
+    /* ── クレジットオーバーレイ ─────────────── */
+    #credit-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 20px;
+    }
+    #credit-overlay.visible { display: flex; }
+    #credit-box {
+      background: rgba(250,250,248,0.98);
+      color: #222;
+      max-width: 480px;
+      width: 100%;
+      max-height: 80vh;
+      max-height: 80dvh;
+      overflow-y: auto;
+      border-radius: 8px;
+      padding: 22px 26px;
+      position: relative;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.6);
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+    #credit-box h2 {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      color: #2a4a6a;
+    }
+    #credit-box h3 {
+      font-size: 0.82rem;
+      margin: 14px 0 4px;
+      color: #3a5878;
+    }
+    #credit-box p { margin: 2px 0; }
+    #credit-box a { color: #2266bb; }
+    #credit-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: rgba(0,0,0,0.06);
+      border: none;
+      color: #333;
+      font-size: 1.2rem;
+      line-height: 1;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #credit-close:hover { background: rgba(0,0,0,0.14); }
+
+    /* ── ツールチップ ───────────────────────── */
+    #tooltip {
+      position: fixed;
+      background: var(--label-bg);
+      color: #222;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      border: 1px solid #ccc;
+      white-space: nowrap;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <div id="header">
+    <h1>山の端</h1>
+    <span class="subtitle">練馬区役所展望ロビー（35.736°N 139.652°E、標高120.9m）から見た西方の稜線</span>
+  </div>
+
+  <div id="toolbar">
+    <button id="mountain-prev">◀ 左の山</button>
+    <button id="mountain-next">右の山 ▶</button>
+    <div class="ctrl-group">
+      <label>山名</label>
+      <select id="mountain-select">
+        <option value="">— 選択 —</option>
+      </select>
+      <button id="mountain-clear" title="選択解除">✕</button>
+    </div>
+    <button id="map-btn">地図</button>
+    <button id="credit-btn">クレジット</button>
+    <div class="ctrl-group">
+      <label>横倍率</label>
+      <input type="range" id="vscale" min="0.1" max="1" step="0.1" value="0.1">
+      <span class="val-display" id="vscale-val">×0.1</span>
+    </div>
+  </div>
+
+  <div id="map-overlay">
+    <img src="kanto_map_mini.png" alt="関東周辺地図">
+    <button id="map-close">&#x2715;</button>
+  </div>
+
+  <div id="canvas-wrapper">
+    <div id="loading">
+      <div class="kanji">山の端</div>
+      <div class="msg">データ読み込み中...</div>
+      <div class="note">通信環境によっては時間がかかる場合があります</div>
+    </div>
+    <div id="scroll-container">
+      <div id="canvas-inner">
+        <canvas id="main-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="credit-overlay">
+  <div id="credit-box">
+    <button id="credit-close">&#x2715;</button>
+    <h2>出典・データについて</h2>
+    <h3>標高データ（地平線計算用 DEM）</h3>
+    <p>SRTM data courtesy of the U.S. Geological Survey and NASA</p>
+    <p>配信: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles</a>（Mapzen由来、CC BY 4.0）</p>
+    <h3>山頂位置情報</h3>
+    <p>山頂の名称・緯度・経度・標高は、<a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> のデータを <a href="https://overpass-api.de/" target="_blank" rel="noopener">Overpass API</a> 経由で取得しました。</p>
+    <p>&copy; OpenStreetMap contributors（<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">ODbL</a>）</p>
+    <h3>計算方法</h3>
+    <p>大円距離・地球曲率・大気屈折補正（屈折係数 k = 0.13）を考慮して、地平線仰角プロファイルを算出しています。</p>
+  </div>
+</div>
+
+<div id="landscape-hint">
+  <div class="hint-box">
+    <div class="hint-icon">&#x21BB;</div>
+    <div class="hint-text">横向きの画面でご覧ください</div>
+    <div class="hint-sub">タップで閉じる</div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// iOS Safari はピンチズームを touch-action とは別の gesture イベントで扱うため、
+// ボタン連打時に指がずれてピンチと誤認識されないよう明示的に無効化する。
+["gesturestart", "gesturechange", "gestureend"].forEach(type => {
+  document.addEventListener(type, e => e.preventDefault());
+});
+
+// ヘッダー・ツールバーの説明テキスト（ラベル等）のダブルタップズームを抑止する。
+// 操作要素（ボタン・入力）は連打が正常動作なので対象外。
+let lastTextTapAt = 0;
+document.addEventListener("touchend", e => {
+  const t = e.target;
+  if (!t.closest("#header, #toolbar")) return;
+  if (t.closest("button, input, select, option")) return;
+  const now = Date.now();
+  if (now - lastTextTapAt < 350) e.preventDefault();
+  lastTextTapAt = now;
+}, { passive: false });
+
+// ═══════════════════════════════════════════════
+// 定数
+// ═══════════════════════════════════════════════
+const DATA_FILE = "horizon_export.json";
+
+// キャンバスの物理的な高さ（px）— ウィンドウに合わせる
+// 1度 = SCALE_PX px とする（縦横共通）→ 等スケール
+const DEG_PER_PX_BASE = 1 / 80;   // 80px = 1度 が基準
+
+// 余白（度単位）
+const MARGIN_AZ    = 1.0;   // 左右
+const MARGIN_ANGLE = 0.3;   // 上下
+
+// 横倍率（gVscale）スライダーの範囲（#vscale の min/max と合わせる）
+const MIN_VSCALE = 0.1;
+const MAX_VSCALE = 1.0;
+
+// 稜線下グラデーション（空気遠近法）
+const HAZE_NEAR_RGB = [30, 42, 54];     // 近景: 濃い青灰色
+const HAZE_FAR_RGB  = [120, 138, 152];  // 遠景: 霞んだ、やや暗めの色
+const HAZE_DECAY_M  = 45000;            // 減衰の特性距離 [m]（大きいほど霞みにくい）
+// 色を決める距離の下限 [m]。視点が低い（地上）と、近景の建物・樹木のブレークポイントが
+// 稜線下の低い仰角に並び、暗い色の帯になる。これより近い点は、この距離の色で塗る。
+const HAZE_MIN_DIST_M = 40000;
+
+// 距離 [m] → 稜線の塗り色（指数減衰による空気遠近法）
+function hazeColor(distM) {
+  const d = isFinite(distM) ? Math.max(HAZE_MIN_DIST_M, distM) : HAZE_MIN_DIST_M;
+  const t = 1 - Math.exp(-d / HAZE_DECAY_M);
+  const r = HAZE_NEAR_RGB[0] + (HAZE_FAR_RGB[0] - HAZE_NEAR_RGB[0]) * t;
+  const g = HAZE_NEAR_RGB[1] + (HAZE_FAR_RGB[1] - HAZE_NEAR_RGB[1]) * t;
+  const b = HAZE_NEAR_RGB[2] + (HAZE_FAR_RGB[2] - HAZE_NEAR_RGB[2]) * t;
+  return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
+}
+
+// ═══════════════════════════════════════════════
+// グローバル状態
+// ═══════════════════════════════════════════════
+let gData             = null;
+let gVscale           = 0.1;
+let gKantoMountains   = [];
+let gSelectedMountain = null;
+let gScale            = null;   // draw() が保存するスケール情報
+let gRidgeCache       = null;   // 稜線塗りつぶしの事前描画キャッシュ
+
+// ═══════════════════════════════════════════════
+// ユーティリティ
+// ═══════════════════════════════════════════════
+
+// canvas-wrapper の高さを縦横比 1:3.85 に固定する
+// （縦が足りない場合は利用可能高さに縮小）
+function updateCanvasHeight() {
+  const wrapper = document.getElementById("canvas-wrapper");
+  const header  = document.getElementById("header");
+  const toolbar = document.getElementById("toolbar");
+  const vw = (window.visualViewport ? window.visualViewport.width  : window.innerWidth);
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  const availH   = vh - header.offsetHeight - toolbar.offsetHeight;
+  const desiredH = Math.round(vw / 3.85);
+  wrapper.style.flex   = "none";
+  wrapper.style.height = Math.min(desiredH, Math.max(50, availH)) + "px";
+}
+
+// ═══════════════════════════════════════════════
+// 稜線塗りつぶしの事前描画キャッシュ
+// ═══════════════════════════════════════════════
+// breakpoints を使った塗りつぶしは1画素ごとにグラデーションを作るため重いが、
+// 横倍率（gVscale）を変えてもキャンバスの「高さ」は常にウィンドウ高さ
+// （canvasH）で固定であり、横倍率が変わるのは「幅」だけ。
+// そこで横倍率が最大（＝等スケール、canvasW が最大になる状態）の塗りつぶし
+// 画像を一度だけ生成してオフスクリーンにキャッシュしておき、実際の描画では
+// それを drawImage で横方向にだけ縮小して使う。
+// 再生成が必要なのはウィンドウの高さが変わった時（＝リサイズ）だけで、
+// ピンチズーム・ホイール・横倍率スライダーの操作では再生成しない。
+function buildRidgeCache(canvasH, angleMin, angleMax, angleSpan, azMin, azSpan, az, ha, hd, bps) {
+  const baseDegPx   = canvasH / angleSpan;             // gVscale = 1.0 相当
+  const baseCanvasW = Math.max(1, Math.round(azSpan * baseDegPx));
+
+  const off = document.createElement("canvas");
+  off.width  = baseCanvasW;
+  off.height = canvasH;
+  const ctx  = off.getContext("2d");
+
+  const azToPx = a   => (a   - azMin)    / azSpan * baseCanvasW;
+  const anToPx = ang => (1 - (ang - angleMin) / angleSpan) * canvasH;
+
+  // ── 空グラデーション ──────────────────────
+  // 稜線から上を透明のまま残すと、縮小（ミップ生成・表示時とも）の際に
+  // 山の輪郭が半透明のフリンジ（にじみ）を出してしまう。draw() 側と同じ
+  // 空グラデーションをあらかじめ塗っておき、常に不透明同士の合成にする。
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, canvasH);
+  skyGrad.addColorStop(0,    "#2266bb");
+  skyGrad.addColorStop(0.55, "#6699cc");
+  skyGrad.addColorStop(0.85, "#99bbdd");
+  skyGrad.addColorStop(1.0,  "#e8f4f8");
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, baseCanvasW, canvasH);
+
+  // ── 稜線 塗りつぶし（距離に応じた空気遠近法グラデーション）──
+  const rawMax = Math.max(...ha.filter(v => v !== null && isFinite(v)));
+  const fallbackGrad = ctx.createLinearGradient(0, anToPx(rawMax), 0, canvasH);
+  fallbackGrad.addColorStop(0,   "#3a5060");
+  fallbackGrad.addColorStop(0.4, "#506878");
+  fallbackGrad.addColorStop(1.0, "#2a3a4a");
+
+  const AZ_STEP2 = az.length > 1 ? (az[az.length - 1] - az[0]) / (az.length - 1) : 1;
+  const interpAt = (arr, azVal) => {
+    const fi = (azVal - az[0]) / AZ_STEP2;
+    const i0 = Math.max(0, Math.min(az.length - 1, Math.floor(fi)));
+    const i1 = Math.min(az.length - 1, i0 + 1);
+    const v0 = arr[i0], v1 = arr[i1];
+    if (v0 === null || v0 === undefined) return v1 ?? null;
+    if (v1 === null || v1 === undefined) return v0;
+    const t = fi - i0;
+    return v0 + (v1 - v0) * t;
+  };
+  const nearestIdx = azVal =>
+    Math.max(0, Math.min(az.length - 1, Math.round((azVal - az[0]) / AZ_STEP2)));
+
+  const xStart = Math.max(0, Math.floor(azToPx(az[0])));
+  const xEnd   = Math.min(baseCanvasW, Math.ceil(azToPx(az[az.length - 1])));
+  for (let x = xStart; x < xEnd; x++) {
+    const azVal = azMin + (x + 0.5) / baseCanvasW * azSpan;
+    const haX = interpAt(ha, azVal);
+    if (haX === null) continue;
+
+    const yTop = anToPx(haX);
+    if (yTop >= canvasH) continue;
+
+    const colBps = bps ? bps[nearestIdx(azVal)] : null;
+
+    if (colBps && colBps.length) {
+      const n = colBps.length;
+      const grad = ctx.createLinearGradient(0, yTop, 0, canvasH);
+      const offsetOf = elevDeg =>
+        Math.min(1, Math.max(0, (anToPx(elevDeg) - yTop) / (canvasH - yTop)));
+
+      // 最も遠いブレークポイント（頂上）から最も近いブレークポイント（麓）へ、
+      // 各点の仰角位置に色ストップを置いてなだらかに繋ぐ
+      grad.addColorStop(0, hazeColor(colBps[n - 1][1] * 1000));
+      let prevOffset = 0;
+      for (let k = n - 2; k >= 0; k--) {
+        const offset = Math.max(prevOffset, offsetOf(colBps[k][0]));
+        grad.addColorStop(offset, hazeColor(colBps[k][1] * 1000));
+        prevOffset = offset;
+      }
+      grad.addColorStop(1, hazeColor(colBps[0][1] * 1000));
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = fallbackGrad;
+    }
+    ctx.fillRect(x, yTop, 1, canvasH - yTop);
+  }
+
+  // 横倍率スライダーは 0.1〜1.0 の範囲なので、この画像を表示時に最大で
+  // 約10倍縮小することになる。1回の drawImage でそこまで大きく縮小すると、
+  // ブラウザの縮小フィルタが追いつかずモアレ状のノイズが出やすいため、
+  // 半分ずつ段階的に縮小した版（ミップマップ）をあらかじめ用意しておき、
+  // 表示時は目的のサイズに最も近い（2倍以内の）版から最後の1回だけ縮小する。
+  const mips = [{ width: baseCanvasW, canvas: off }];
+  const minWidth = Math.max(1, Math.round(baseCanvasW * MIN_VSCALE));
+  let curCanvas = off;
+  let curWidth  = baseCanvasW;
+  while (curWidth > minWidth) {
+    const nextWidth = Math.max(minWidth, Math.round(curWidth / 2));
+    const nextCanvas = document.createElement("canvas");
+    nextCanvas.width  = nextWidth;
+    nextCanvas.height = canvasH;
+    const nctx = nextCanvas.getContext("2d");
+    nctx.imageSmoothingEnabled = true;
+    nctx.imageSmoothingQuality = "high";
+    nctx.drawImage(curCanvas, 0, 0, curWidth, canvasH, 0, 0, nextWidth, canvasH);
+    mips.push({ width: nextWidth, canvas: nextCanvas });
+    curCanvas = nextCanvas;
+    curWidth  = nextWidth;
+  }
+
+  return { canvasH, azSpan, baseCanvasW, mips };
+}
+
+// mips（大きい順に並んだ縮小版の配列）から、目的の幅に最も近い
+// （かつ目的の幅以上の）版を選ぶ。最終的な drawImage の縮小率を
+// 2倍未満に抑え、画質を保つのが目的。
+function pickMipLevel(mips, targetWidth) {
+  for (let i = mips.length - 1; i >= 0; i--) {
+    if (mips[i].width >= targetWidth) return mips[i];
+  }
+  return mips[0];
+}
+
+// ═══════════════════════════════════════════════
+// 描画
+// ═══════════════════════════════════════════════
+function draw() {
+  if (!gData) return;
+
+  const d      = gData;
+  const az     = d.horizon.azimuths;
+  const ha_raw = d.horizon.horizon_angles;
+  const hd     = d.horizon.horizon_dists;
+  const bps    = d.horizon.breakpoints || null;
+  const stats  = d.stats;
+
+  // 平滑化
+  const ha = ha_raw;
+
+  // ── スケール計算 ──────────────────────────
+  // 縦横 1px = 同じ角度幅（等スケール）
+  // ウィンドウ高さからスケールを決める
+  const wrapper    = document.getElementById("canvas-wrapper");
+  const canvasH    = wrapper.clientHeight;
+
+  // 表示する仰角範囲
+  const validHA   = ha.filter(v => v !== null && isFinite(v));
+  const rawMin    = Math.min(...validHA);
+  const rawMax    = Math.max(...validHA);
+  const angleMin  = rawMin - MARGIN_ANGLE;
+  const angleMax  = rawMax + MARGIN_ANGLE * 3;   // ラベル用に上を広く
+  const angleSpan = angleMax - angleMin;          // 度
+
+  // 1度 = degPx px（縦）
+  const degPx     = (canvasH / angleSpan) * gVscale;
+
+  // 方位角範囲
+  const azMin  = stats.az_min - MARGIN_AZ;
+  const azMax  = stats.az_max + MARGIN_AZ;
+  const azSpan = azMax - azMin;
+
+  // 稜線塗りつぶしは重いので、ウィンドウの高さが変わらない限り
+  // 作り直さない（横倍率だけの変更では再生成しない）
+  if (!gRidgeCache || gRidgeCache.canvasH !== canvasH || gRidgeCache.azSpan !== azSpan) {
+    gRidgeCache = buildRidgeCache(canvasH, angleMin, angleMax, angleSpan, azMin, azSpan, az, ha, hd, bps);
+  }
+
+  // 横幅（縦と同じ degPx を使う → 等スケール）
+  const canvasW = Math.round(azSpan * degPx);
+
+  // キャンバスサイズ設定
+  const canvas  = document.getElementById("main-canvas");
+  const inner   = document.getElementById("canvas-inner");
+  const effectiveH = Math.round(angleSpan * degPx / gVscale);  // 実際のキャンバスpx高
+
+  canvas.width  = canvasW;
+  canvas.height = effectiveH;
+  canvas.style.width  = canvasW + "px";
+  canvas.style.height = "100%";
+  inner.style.width   = canvasW + "px";
+
+  const ctx = canvas.getContext("2d");
+
+  // 座標変換ヘルパー
+  const azToPx = az  => (az  - azMin)    / azSpan * canvasW;
+  const anToPx = ang => (1 - (ang - angleMin) / angleSpan) * effectiveH;
+
+  // ── 空グラデーション ──────────────────────
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, effectiveH);
+  skyGrad.addColorStop(0,    "#2266bb");
+  skyGrad.addColorStop(0.55, "#6699cc");
+  skyGrad.addColorStop(0.85, "#99bbdd");
+  skyGrad.addColorStop(1.0,  "#e8f4f8");
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, canvasW, effectiveH);
+
+  // ── 稜線 塗りつぶし ── 事前描画キャッシュを横方向にだけ縮小して描く
+  // （高さは常に canvasH = effectiveH と一致するため、縦方向の拡縮は発生しない）。
+  // 目的の幅に最も近い（2倍以内の）ミップ版から描くことで、大きな縮小率
+  // による縮小フィルタのモアレ状ノイズを避ける。
+  const mip = pickMipLevel(gRidgeCache.mips, canvasW);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(
+    mip.canvas,
+    0, 0, mip.width, gRidgeCache.canvasH,
+    0, 0, canvasW, effectiveH
+  );
+
+  // ── 方位角ラベル（上端）────────────────────
+  // 稜線塗りつぶしのキャッシュ画像は空（稜線より上）も不透明で描かれるため、
+  // 目盛りラベル類は塗りつぶしより後に描いて上に重ねる
+  const compassMap = {
+    225: "南西", 247.5: "西南西", 270: "西",
+    292.5: "西北西", 315: "北西",  337.5: "北北西"
+  };
+  const azTicks = [220,225,230,235,240,245,250,255,260,265,270,
+                   275,280,285,290,295,300,305,310,315,320,325,330,335,340];
+  ctx.save();
+  ctx.fillStyle   = "rgba(255,255,255,0.85)";
+  ctx.font        = `${Math.max(10, Math.min(12, degPx * 0.18))}px 'Courier New'`;
+  ctx.textAlign   = "center";
+  ctx.textBaseline = "top";
+  for (const a of azTicks) {
+    const x   = azToPx(a);
+    const big = a % 10 === 0;
+    // 目盛り線（上端から下方向）
+    ctx.strokeStyle = big ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.30)";
+    ctx.lineWidth   = big ? 1.5 : 0.7;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, big ? 9 : 6);
+    ctx.stroke();
+    if (big) {
+      ctx.fillStyle = "rgba(255,255,255,0.90)";
+      ctx.fillText(a + "°", x, 11);
+    }
+  }
+  // 方位名ラベル（22.5°ごと）
+  for (const [az, name] of Object.entries(compassMap)) {
+    const x = azToPx(parseFloat(az));
+    ctx.fillStyle = "rgba(255,255,255,0.60)";
+    ctx.fillText(name, x, 23);
+  }
+  ctx.restore();
+
+  // ── 仰角ラベル（左端）────────────────────
+  ctx.save();
+  ctx.font        = `${Math.max(9, Math.min(11, degPx * 0.15))}px 'Courier New'`;
+  ctx.textAlign   = "left";
+  ctx.textBaseline = "middle";
+  for (let ang = Math.ceil(angleMin / 0.5) * 0.5; ang <= angleMax; ang += 0.5) {
+    const y   = anToPx(ang);
+    const big = Math.abs(ang % 1) < 0.001;
+    // 目盛り線（左端から右方向）
+    ctx.strokeStyle = big ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.30)";
+    ctx.lineWidth   = big ? 1.5 : 0.7;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(big ? 9 : 6, y);
+    ctx.stroke();
+    if (big) {
+      ctx.fillStyle = "rgba(255,255,255,0.65)";
+      ctx.fillText(ang.toFixed(1) + "°", 11, y);
+    }
+  }
+  ctx.restore();
+
+  // ── 稜線ライン ────────────────────────────
+  // 細い線なので横圧縮でつぶれないよう、キャッシュ画像にはせず毎回ライブの
+  // 解像度で直接描く（塗りつぶしと違って負荷は軽い）
+  ctx.beginPath();
+  let first = true;
+  for (let i = 0; i < az.length; i++) {
+    if (ha[i] === null) continue;
+    const x = azToPx(az[i]);
+    const y = anToPx(ha[i]);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else        { ctx.lineTo(x, y); }
+  }
+  ctx.strokeStyle = "rgba(180,215,235,0.8)";
+  ctx.lineWidth   = 1.5;
+  ctx.setLineDash([]);
+  ctx.stroke();
+
+  // ── 山名ラベル ────────────────────────────
+  {
+    const mountains = d.mountains;
+    // 重なり防止: 描画済み x 座標を記録
+    const placedX = [];
+    const minGap  = degPx * 3.5;   // 3.5度分のギャップ
+
+    // 仰角降順でソート（高い山を優先）
+    const sorted = [...mountains].sort((a, b) => b.angle_deg - a.angle_deg);
+
+    const fontSize = Math.max(11, Math.min(14, degPx * 0.2));
+    ctx.font = `${fontSize}px 'Noto Serif JP', serif`;
+
+    for (const m of sorted) {
+      const x = azToPx(m.azimuth);
+      const y = anToPx(m.angle_deg);
+
+      // 重なりチェック
+      if (placedX.some(px => Math.abs(px - x) < minGap)) continue;
+      placedX.push(x);
+
+      // ラベル内容
+      const lines = [m.name];
+
+      const lineH    = fontSize + 3;
+      const labelH   = lineH * lines.length + 8;
+      const labelW   = Math.max(...lines.map(l => ctx.measureText(l).width)) + 12;
+      const stemLen  = Math.max(30, degPx * 0.5);
+      const labelTop = Math.max(4, y - stemLen - labelH);
+
+      // ラベル背景
+      const lx = Math.min(x - labelW / 2, canvasW - labelW - 4);
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
+      ctx.beginPath();
+      ctx.roundRect(lx, labelTop, labelW, labelH, 3);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(180,180,180,0.35)";
+      ctx.lineWidth   = 0.7;
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      // ラベルテキスト
+      ctx.fillStyle   = "#1a1a1a";
+      ctx.textAlign   = "left";
+      ctx.textBaseline = "top";
+      for (let li = 0; li < lines.length; li++) {
+        ctx.font = li === 0
+          ? `bold ${fontSize}px 'Noto Serif JP', serif`
+          : `${fontSize - 1}px 'Courier New'`;
+        ctx.fillStyle = li === 0 ? "#1a1a1a" : "#555555";
+        ctx.fillText(lines[li], lx + 6, labelTop + 4 + li * lineH);
+      }
+    }
+  }
+
+  // ── 選択山ハイライト ──────────────────────────
+  if (gSelectedMountain) {
+    const m  = gSelectedMountain;
+    const x  = azToPx(m.azimuth);
+    const y  = anToPx(m.angle_deg);
+    const r  = 7;
+
+    // 縦線（黄色点線）
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 210, 40, 0.80)";
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([8, 5]);
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, effectiveH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ステムライン（マーカー→ラベルへ）
+    const selLines   = [m.name, `${m.elev}m ${m.distance_km}km`];
+    const selFontSz  = Math.max(11, Math.min(14, degPx * 0.2));
+    const selNameSz  = selFontSz + 2;
+    ctx.font = `bold ${selNameSz}px 'Noto Serif JP', serif`;
+    const w0 = ctx.measureText(selLines[0]).width;
+    ctx.font = `bold ${selFontSz}px 'Noto Serif JP', serif`;
+    const w1 = ctx.measureText(selLines[1]).width;
+    const selLw      = Math.max(w0, w1) + 14;
+    const selNameH   = selNameSz + 3;
+    const selDataH   = selFontSz + 3;
+    const selLh      = selNameH + selDataH + 8;
+    const selStem    = Math.max(30, degPx * 0.5);
+    const selTop     = Math.max(4, y - r - selStem - selLh);
+    const selLx      = Math.min(Math.max(4, x - selLw / 2), canvasW - selLw - 4);
+
+    ctx.strokeStyle = "rgba(255, 200, 0, 0.85)";
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x, y - r);
+    ctx.lineTo(x, selTop + selLh);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ラベル背景（黄味がかった白）
+    ctx.fillStyle   = "rgba(255, 248, 190, 0.97)";
+    ctx.strokeStyle = "rgba(180, 130, 0, 0.8)";
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.roundRect(selLx, selTop, selLw, selLh, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // ラベルテキスト
+    for (let li = 0; li < selLines.length; li++) {
+      ctx.font = li === 0
+        ? `bold ${selNameSz}px 'Noto Serif JP', serif`
+        : `bold ${selFontSz}px 'Noto Serif JP', serif`;
+      ctx.fillStyle    = li === 0 ? "#3a2000" : "#664400";
+      ctx.textAlign    = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(selLines[li], selLx + 7, selTop + 4 + (li === 0 ? 0 : selNameH));
+    }
+
+    // 菱形マーカー
+    ctx.beginPath();
+    ctx.moveTo(x,     y - r);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x,     y + r);
+    ctx.lineTo(x - r, y);
+    ctx.closePath();
+    ctx.fillStyle   = "rgba(255, 210, 40, 0.95)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+    ctx.lineWidth   = 1.5;
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // スケール情報を保存（scrollToMountain で使用）
+  gScale = { azMin, azSpan, canvasW };
+}
+
+// ═══════════════════════════════════════════════
+// 中心方位角を保ちながら再描画
+// ═══════════════════════════════════════════════
+function drawPreserveCenter() {
+  const sc = document.getElementById("scroll-container");
+  let centerAz = null;
+  if (gScale) {
+    const centerPx = sc.scrollLeft + sc.clientWidth / 2;
+    centerAz = gScale.azMin + (centerPx / gScale.canvasW) * gScale.azSpan;
+  }
+  draw();
+  if (centerAz !== null && gScale) {
+    const newCenterPx = (centerAz - gScale.azMin) / gScale.azSpan * gScale.canvasW;
+    sc.scrollLeft = newCenterPx - sc.clientWidth / 2;
+  }
+}
+
+// ピンチズーム・ホイール・スライダー操作は短時間に何度も発火するため、
+// draw() の呼び出しを1フレームに1回へ間引く（描画内容自体は一切変えない）
+let gDrawScheduled = false;
+function scheduleDrawPreserveCenter() {
+  if (gDrawScheduled) return;
+  gDrawScheduled = true;
+  requestAnimationFrame(() => {
+    gDrawScheduled = false;
+    drawPreserveCenter();
+  });
+}
+
+// ═══════════════════════════════════════════════
+// ピンチズーム（vscale 変更）
+// ═══════════════════════════════════════════════
+function setupPinchZoom() {
+  const el = document.getElementById("scroll-container");
+  let initDist   = null;
+  let initVscale = null;
+
+  function touchDist(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  el.addEventListener("touchstart", e => {
+    if (e.touches.length === 2) {
+      initDist   = touchDist(e.touches);
+      initVscale = gVscale;
+    }
+  }, { passive: true });
+
+  el.addEventListener("touchmove", e => {
+    if (e.touches.length !== 2 || initDist === null) return;
+    e.preventDefault();
+    const ratio    = touchDist(e.touches) / initDist;
+    const newScale = Math.min(1.0, Math.max(0.1, initVscale * ratio));
+    gVscale = newScale;
+    const vslider = document.getElementById("vscale");
+    const vval    = document.getElementById("vscale-val");
+    vslider.value     = newScale;
+    vval.textContent  = "×" + newScale.toFixed(2);
+    scheduleDrawPreserveCenter();
+  }, { passive: false });
+
+  el.addEventListener("touchend", e => {
+    if (e.touches.length < 2) {
+      initDist   = null;
+      initVscale = null;
+    }
+  }, { passive: true });
+}
+
+// ═══════════════════════════════════════════════
+// ホイール → 縦倍率変更
+// ═══════════════════════════════════════════════
+function setupWheelZoom() {
+  const el      = document.getElementById("scroll-container");
+  const vslider = document.getElementById("vscale");
+  const vval    = document.getElementById("vscale-val");
+
+  el.addEventListener("wheel", e => {
+    e.preventDefault();
+    const step  = 0.1;
+    const delta = e.deltaY > 0 ? -step : step;
+    gVscale = Math.round(Math.min(1.0, Math.max(0.1, gVscale + delta)) * 10) / 10;
+    vslider.value    = gVscale;
+    vval.textContent = "×" + gVscale.toFixed(1);
+    scheduleDrawPreserveCenter();
+  }, { passive: false });
+}
+
+// ═══════════════════════════════════════════════
+// ドラッグスクロール
+// ═══════════════════════════════════════════════
+function setupDragScroll() {
+  const el = document.getElementById("scroll-container");
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  el.addEventListener("mousedown", e => {
+    isDown = true;
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+  });
+  el.addEventListener("mouseleave", () => { isDown = false; });
+  el.addEventListener("mouseup",   () => { isDown = false; });
+  el.addEventListener("mousemove", e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x    = e.pageX - el.offsetLeft;
+    const walk = x - startX;
+    el.scrollLeft = scrollLeft - walk;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// コントロール
+// ═══════════════════════════════════════════════
+function setupControls() {
+  const vslider = document.getElementById("vscale");
+  const vval    = document.getElementById("vscale-val");
+  vslider.addEventListener("input", () => {
+    gVscale = parseFloat(vslider.value);
+    vval.textContent = "×" + gVscale.toFixed(1);
+    scheduleDrawPreserveCenter();
+  });
+
+  // 地図オーバーレイ
+  const mapOverlay = document.getElementById("map-overlay");
+  document.getElementById("map-btn").addEventListener("click", () => {
+    mapOverlay.classList.add("visible");
+  });
+  document.getElementById("map-close").addEventListener("click", () => {
+    mapOverlay.classList.remove("visible");
+  });
+  mapOverlay.addEventListener("click", e => {
+    if (e.target === mapOverlay) mapOverlay.classList.remove("visible");
+  });
+
+  // クレジットオーバーレイ
+  const creditOverlay = document.getElementById("credit-overlay");
+  document.getElementById("credit-btn").addEventListener("click", () => {
+    creditOverlay.classList.add("visible");
+  });
+  document.getElementById("credit-close").addEventListener("click", () => {
+    creditOverlay.classList.remove("visible");
+  });
+  creditOverlay.addEventListener("click", e => {
+    if (e.target === creditOverlay) creditOverlay.classList.remove("visible");
+  });
+
+  window.addEventListener("resize", () => { updateCanvasHeight(); scheduleDrawPreserveCenter(); });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => { updateCanvasHeight(); scheduleDrawPreserveCenter(); });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 山リストボックス
+// ═══════════════════════════════════════════════
+function mountainOptionText(m) {
+  return `${m.name}  :  ${m.elev}m  ${m.distance_km}km  ${m.azimuth.toFixed(1)}°`;
+}
+
+function refreshOptionTexts(selectedIdx) {
+  const sel = document.getElementById("mountain-select");
+  for (const opt of sel.options) {
+    const idx = parseInt(opt.value, 10);
+    if (isNaN(idx)) continue;
+    const m = gKantoMountains[idx];
+    opt.textContent = (idx === selectedIdx) ? m.name : mountainOptionText(m);
+  }
+}
+
+async function loadKantoMountains() {
+  try {
+    const res = await fetch("kanto_mountains.json?v=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    gKantoMountains = data.mountains;
+
+    const sel = document.getElementById("mountain-select");
+    gKantoMountains.forEach((m, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = mountainOptionText(m);
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.warn("kanto_mountains.json の読み込み失敗", e);
+  }
+}
+
+function scrollToMountain(m) {
+  if (!gScale) return;
+  const x  = (m.azimuth - gScale.azMin) / gScale.azSpan * gScale.canvasW;
+  const sc = document.getElementById("scroll-container");
+  const visL = sc.scrollLeft;
+  const visR = sc.scrollLeft + sc.clientWidth;
+  if (x >= visL && x <= visR) return;
+  sc.scrollLeft = x - sc.clientWidth / 2;
+}
+
+function getCenterMountainIdx() {
+  if (!gScale || gKantoMountains.length === 0) return -1;
+  const sc = document.getElementById("scroll-container");
+  const centerPx = sc.scrollLeft + sc.clientWidth / 2;
+  const centerAz = gScale.azMin + (centerPx / gScale.canvasW) * gScale.azSpan;
+  let nearest = 0, minDiff = Infinity;
+  for (let i = 0; i < gKantoMountains.length; i++) {
+    const diff = Math.abs(gKantoMountains[i].azimuth - centerAz);
+    if (diff < minDiff) { minDiff = diff; nearest = i; }
+  }
+  return nearest;
+}
+
+function updateNavButtons() {
+  const sel  = document.getElementById("mountain-select");
+  const prev = document.getElementById("mountain-prev");
+  const next = document.getElementById("mountain-next");
+  const idx  = parseInt(sel.value, 10);
+  const prevDisabled = !isNaN(idx) && idx === 0;
+  const nextDisabled = !isNaN(idx) && idx === gKantoMountains.length - 1;
+  prev.classList.toggle("nav-disabled", prevDisabled);
+  next.classList.toggle("nav-disabled", nextDisabled);
+  prev.setAttribute("aria-disabled", prevDisabled);
+  next.setAttribute("aria-disabled", nextDisabled);
+}
+
+function setupNavButtons() {
+  const sel  = document.getElementById("mountain-select");
+  const prev = document.getElementById("mountain-prev");
+  const next = document.getElementById("mountain-next");
+
+  prev.addEventListener("click", () => {
+    const idx = parseInt(sel.value, 10);
+    if (isNaN(idx)) {
+      const c = getCenterMountainIdx();
+      if (c < 0) return;
+      sel.value = c;
+    } else {
+      sel.value = Math.max(0, idx - 1);
+    }
+    sel.dispatchEvent(new Event("change"));
+  });
+
+  next.addEventListener("click", () => {
+    const idx = parseInt(sel.value, 10);
+    if (isNaN(idx)) {
+      const c = getCenterMountainIdx();
+      if (c < 0) return;
+      sel.value = c;
+    } else {
+      sel.value = Math.min(gKantoMountains.length - 1, idx + 1);
+    }
+    sel.dispatchEvent(new Event("change"));
+  });
+
+  updateNavButtons();
+}
+
+function setupMountainSelect() {
+  const sel = document.getElementById("mountain-select");
+  const clr = document.getElementById("mountain-clear");
+
+  sel.addEventListener("change", () => {
+    const idx = parseInt(sel.value, 10);
+    gSelectedMountain = isNaN(idx) ? null : gKantoMountains[idx];
+    refreshOptionTexts(isNaN(idx) ? -1 : idx);
+    draw();
+    if (gSelectedMountain) scrollToMountain(gSelectedMountain);
+    updateNavButtons();
+  });
+
+  clr.addEventListener("click", () => {
+    sel.value         = "";
+    gSelectedMountain = null;
+    refreshOptionTexts(-1);
+    draw();
+    updateNavButtons();
+  });
+}
+
+// ═══════════════════════════════════════════════
+// クリック／タップ → 最近傍の山を選択
+// ═══════════════════════════════════════════════
+function setupClickSelect() {
+  const el     = document.getElementById("scroll-container");
+  const canvas = document.getElementById("main-canvas");
+
+  // ── マウス：ドラッグと区別してクリック判定 ──
+  let mouseDownX          = null;
+  let mouseDownScrollLeft = null;
+  let lastTouchEndTime    = 0;   // タッチ後の合成mouseイベントを無視するため
+
+  el.addEventListener("mousedown", e => {
+    if (Date.now() - lastTouchEndTime < 500) return;  // 合成イベント無視
+    mouseDownX          = e.clientX;
+    mouseDownScrollLeft = el.scrollLeft;
+  });
+
+  el.addEventListener("mouseup", e => {
+    if (Date.now() - lastTouchEndTime < 500) return;  // 合成イベント無視
+    if (mouseDownX === null) return;
+    const movedClient = Math.abs(e.clientX - mouseDownX);
+    const movedScroll = Math.abs(el.scrollLeft - mouseDownScrollLeft);
+    mouseDownX = null;
+    if (movedClient > 5 || movedScroll > 5) return;   // ドラッグは無視
+    handleSelect(e.clientX, e.clientY);
+  });
+
+  // ── タッチ：ピンチ・スクロールと区別してタップ判定 ──
+  let touchStartX   = null;
+  let touchStartY   = null;
+  let touchWasMulti = false;
+
+  el.addEventListener("touchstart", e => {
+    if (e.touches.length === 1) {
+      touchStartX   = e.touches[0].clientX;
+      touchStartY   = e.touches[0].clientY;
+      touchWasMulti = false;
+    } else {
+      touchWasMulti = true;
+    }
+  }, { passive: true });
+
+  el.addEventListener("touchend", e => {
+    lastTouchEndTime = Date.now();   // 合成mouseイベント抑制用
+    if (touchStartX === null || touchWasMulti) { touchStartX = null; return; }
+    if (e.changedTouches.length !== 1)          { touchStartX = null; return; }
+    const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    const cx = e.changedTouches[0].clientX;
+    touchStartX = null;
+    touchStartY = null;
+    if (dx > 10 || dy > 10) return;   // スクロールは無視
+    handleSelect(cx, e.changedTouches[0].clientY);
+  }, { passive: true });
+
+  // ── 共通処理：clientX → 方位角 → 最近傍の山を選択 ──
+  function handleSelect(clientX, clientY) {
+    if (!gData || gKantoMountains.length === 0) return;
+
+    // 山が選択中のとき: 画面左10% → 左の山, 画面右10% → 右の山
+    if (gSelectedMountain) {
+      const scRect = el.getBoundingClientRect();
+      const relX   = clientX - scRect.left;
+      const w      = scRect.width;
+      if (relX < w * 0.10) {
+        document.getElementById("mountain-prev").click();
+        return;
+      }
+      if (relX > w * 0.90) {
+        document.getElementById("mountain-next").click();
+        return;
+      }
+    }
+
+    const rect   = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const px     = (clientX - rect.left) * scaleX;
+    if (px < 0 || px > canvas.width) return;
+
+    // キャンバス上端・下端 10% はツールバー誤操作防止のため無効
+    const py = clientY - rect.top;
+    if (py < rect.height * 0.10) return;
+    if (py > rect.height * 0.90) return;
+
+    const stats  = gData.stats;
+    const azMin  = stats.az_min - MARGIN_AZ;
+    const azMax  = stats.az_max + MARGIN_AZ;
+    const azSpan = azMax - azMin;
+    const azAtClick = azMin + (px / canvas.width) * azSpan;
+
+    let nearest = -1;
+    let minDiff = Infinity;
+    for (let i = 0; i < gKantoMountains.length; i++) {
+      const diff = Math.abs(gKantoMountains[i].azimuth - azAtClick);
+      if (diff < minDiff) { minDiff = diff; nearest = i; }
+    }
+    if (nearest < 0) return;
+
+    const sel = document.getElementById("mountain-select");
+    sel.value = nearest;
+    sel.dispatchEvent(new Event("change"));
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 起動
+// ═══════════════════════════════════════════════
+async function init() {
+  try {
+    const res  = await fetch(DATA_FILE + "?v=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    gData = await res.json();
+
+    document.getElementById("loading").style.display = "none";
+
+    setupControls();
+    setupPinchZoom();
+    setupWheelZoom();
+    setupDragScroll();
+    await loadKantoMountains();
+    setupMountainSelect();
+    setupNavButtons();
+    setupClickSelect();
+    updateCanvasHeight();
+    draw();
+  } catch (err) {
+    document.querySelector("#loading .msg").textContent =
+      `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
+    document.querySelector("#loading .note").style.display = "none";
+    console.error(err);
+  }
+}
+
+init();
+
+// ── 横向きガイド ──────────────────────────────
+(function () {
+  const hint = document.getElementById("landscape-hint");
+  let dismissed = false;
+
+  // スマートフォン縦向き判定（タブレット・PCは除外）
+  const mq = window.matchMedia(
+    "(pointer: coarse) and (orientation: portrait) and (max-width: 767px)"
+  );
+
+  function show() {
+    if (dismissed) return;
+    hint.classList.remove("hidden");
+  }
+
+  function hide() {
+    hint.classList.add("hidden");
+  }
+
+  function dismiss() {
+    dismissed = true;
+    hide();
+  }
+
+  // 初期状態: 条件を満たさなければ最初から非表示
+  if (mq.matches) {
+    show();
+  } else {
+    hint.classList.add("hidden");
+  }
+
+  // 向き変更で再判定（縦→横で自動非表示、横→縦で再表示）
+  mq.addEventListener("change", function (e) {
+    if (e.matches) show(); else hide();
+  });
+
+  // タップ/クリックで手動に閉じる（以後は再表示しない）
+  hint.addEventListener("click", dismiss);
+  hint.addEventListener("touchend", function (e) { e.preventDefault(); dismiss(); });
+})();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(err => {
+    console.warn('Service Worker 登録失敗:', err);
+  });
+}
+</script>
+</body>
+</html>

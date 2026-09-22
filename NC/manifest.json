@@ -1,0 +1,18 @@
+{
+  "name": "山の端 — 練馬区役所展望ロビーからの眺望",
+  "short_name": "練馬展望ロビー",
+  "description": "練馬区役所展望ロビーから見える奥秩父・奥多摩・丹沢・富士山の山並みビューア",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./yamanoha_icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
