@@ -121,7 +121,8 @@
       pointer-events: none;
     }
 
-    /* 視点の詳細（座標・標高）: 各ビューアのサブタイトルをそのまま表示 */
+    /* 視点の詳細（座標・標高）: 各ビューアのサブタイトルから視点名を除いて表示。
+       幅が足りない場合（スマートフォン等）は右端を「…」で省略する */
     #header .subtitle {
       min-width: 0;
       font-size: 0.70rem;
@@ -130,12 +131,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    /* スマートフォン（縦向き・横向きとも）: 詳細は省いて1行に収める */
-    @media (max-width: 767px),
-           (orientation: landscape) and (max-height: 500px) {
-      #header .subtitle { display: none; }
     }
 
     /* ── ビューア本体 ───────────────────────── */
@@ -251,9 +246,13 @@ viewer.addEventListener("load", () => {
       (loadCount > 1 ? "#landscape-hint { display: none !important; }" : "");
     doc.head.appendChild(style);
 
-    // ビューアのサブタイトル（座標・標高）とページタイトルを取り込む
-    const sub = doc.querySelector("#header .subtitle");
-    subtitle.textContent = sub ? sub.textContent : "";
+    // ビューアのサブタイトル（座標・標高）とページタイトルを取り込む。
+    // 冒頭の視点名（「東京北部」等）はリストボックスに出ているので除き、
+    // 「（35.744°N …、標高45m）から見た西方の稜線」の形にする
+    const sub  = doc.querySelector("#header .subtitle");
+    const text = sub ? sub.textContent.trim() : "";
+    const paren = text.indexOf("（");
+    subtitle.textContent = paren > 0 ? text.slice(paren) : text;
     subtitle.title = subtitle.textContent;
     if (doc.title) document.title = doc.title;
 
