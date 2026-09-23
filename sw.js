@@ -1,12 +1,15 @@
-const CACHE_NAME = 'yamanoha-nc-v1';
+// ルート（視点切り替えページ）用の Service Worker。
+// 各ビューア（./NC ./TC ./SJ）はそれぞれ自分の sw.js を持つので、
+// ここではルート直下のファイルだけを扱い、サブフォルダへの要求には関与しない。
+const CACHE_NAME = 'yamanoha-root-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './horizon_export.json',
-  './kanto_mountains.json',
-  './kanto_map_mini.png'
+  './yamanoha_icon.png'
 ];
+
+const SCOPE_PATH = new URL('./', self.location).pathname;
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -16,51 +19,41 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
+  // 他のビューアのキャッシュは消さない（自分の旧バージョンだけ削除）
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys
+        .filter(k => k.startsWith('yamanoha-root-') && k !== CACHE_NAME)
+        .map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  // ナビゲーション（index.html）はネットワーク優先 → コード変更がすぐ反映される
-  // オフライン時のみキャッシュにフォールバック
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // ルート直下のファイルだけを対象にする（サブフォルダはブラウザ既定の処理に任せる）
+  const rest = url.pathname.slice(SCOPE_PATH.length);
+  if (!url.pathname.startsWith(SCOPE_PATH) || rest.includes('/')) return;
+
+  // ページはネットワーク優先 → コード変更がすぐ反映される。オフライン時のみキャッシュ
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then(response => {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          caches.open(CACHE_NAME).then(cache => cache.put(url.origin + url.pathname, clone));
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(url.origin + url.pathname)
+          .then(cached => cached || caches.match('./index.html')))
     );
     return;
   }
 
-  // データ JSON（horizon_export.json / kanto_mountains.json）はネットワーク優先。
-  // index.html は "?v=<時刻>" を付けて取得するためキャッシュのキーと一致しない。
-  // そこでクエリを除いた URL をキーにして保存・参照し、オフライン時は直近の取得結果を返す。
-  const url = new URL(event.request.url);
-  if (url.origin === self.location.origin && url.pathname.endsWith('.json')) {
-    const cacheKey = url.origin + url.pathname;
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(cacheKey, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(cacheKey).then(cached => cached || Response.error()))
-    );
-    return;
-  }
-
-  // その他のアセット（PNG・フォントなど）はキャッシュ優先
+  // その他（アイコン・manifest）はキャッシュ優先
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
