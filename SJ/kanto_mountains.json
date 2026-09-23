@@ -1,0 +1,1909 @@
+{
+  "viewpoint": {
+    "lat": 35.743772,
+    "lon": 139.606821,
+    "alt": 46.5,
+    "name": "東京北部"
+  },
+  "filter": {
+    "az_range": [
+      220.0,
+      340.0
+    ],
+    "dist_max_km": 135.0,
+    "elev_min_m": 590.0,
+    "horizon_threshold": 0.9
+  },
+  "mountains": [
+    {
+      "name": "神山",
+      "lat": 35.233478,
+      "lon": 139.020968,
+      "elev": 1438,
+      "azimuth": 223.37,
+      "distance_km": 77.7,
+      "angle_deg": 0.7227
+    },
+    {
+      "name": "冠ヶ岳",
+      "lat": 35.235275,
+      "lon": 139.020509,
+      "elev": 1409,
+      "azimuth": 223.49,
+      "distance_km": 77.5,
+      "angle_deg": 0.7033
+    },
+    {
+      "name": "大山",
+      "lat": 35.440832,
+      "lon": 139.231334,
+      "elev": 1252,
+      "azimuth": 225.46,
+      "distance_km": 47.8,
+      "angle_deg": 1.2568
+    },
+    {
+      "name": "西沢ノ頭",
+      "lat": 35.451393,
+      "lon": 139.228058,
+      "elev": 1094,
+      "azimuth": 226.73,
+      "distance_km": 47.2,
+      "angle_deg": 1.0859
+    },
+    {
+      "name": "三峰山",
+      "lat": 35.464693,
+      "lon": 139.244759,
+      "elev": 935,
+      "azimuth": 226.76,
+      "distance_km": 45.1,
+      "angle_deg": 0.9519
+    },
+    {
+      "name": "二ノ塔",
+      "lat": 35.434038,
+      "lon": 139.195538,
+      "elev": 1144,
+      "azimuth": 227.44,
+      "distance_km": 50.7,
+      "angle_deg": 1.0419
+    },
+    {
+      "name": "三ノ塔",
+      "lat": 35.436571,
+      "lon": 139.191557,
+      "elev": 1205,
+      "azimuth": 227.95,
+      "distance_km": 50.8,
+      "angle_deg": 1.1085
+    },
+    {
+      "name": "烏尾山",
+      "lat": 35.439582,
+      "lon": 139.185487,
+      "elev": 1136,
+      "azimuth": 228.65,
+      "distance_km": 51.0,
+      "angle_deg": 1.0254
+    },
+    {
+      "name": "行者岳",
+      "lat": 35.445407,
+      "lon": 139.182232,
+      "elev": 1180,
+      "azimuth": 229.42,
+      "distance_km": 50.8,
+      "angle_deg": 1.0808
+    },
+    {
+      "name": "新大日",
+      "lat": 35.451661,
+      "lon": 139.176769,
+      "elev": 1340,
+      "azimuth": 230.38,
+      "distance_km": 50.7,
+      "angle_deg": 1.2637
+    },
+    {
+      "name": "大丸",
+      "lat": 35.449414,
+      "lon": 139.157467,
+      "elev": 1386,
+      "azimuth": 231.4,
+      "distance_km": 52.2,
+      "angle_deg": 1.2659
+    },
+    {
+      "name": "塔ノ岳",
+      "lat": 35.45407,
+      "lon": 139.163317,
+      "elev": 1491,
+      "azimuth": 231.48,
+      "distance_km": 51.5,
+      "angle_deg": 1.4066
+    },
+    {
+      "name": "丹沢山",
+      "lat": 35.474362,
+      "lon": 139.162692,
+      "elev": 1567,
+      "azimuth": 233.52,
+      "distance_km": 50.1,
+      "angle_deg": 1.5414
+    },
+    {
+      "name": "鬼ヶ岩ノ頭",
+      "lat": 35.482313,
+      "lon": 139.146448,
+      "elev": 1608,
+      "azimuth": 235.32,
+      "distance_km": 50.8,
+      "angle_deg": 1.5618
+    },
+    {
+      "name": "蛭ヶ岳",
+      "lat": 35.486231,
+      "lon": 139.138801,
+      "elev": 1673,
+      "azimuth": 236.16,
+      "distance_km": 51.1,
+      "angle_deg": 1.6221
+    },
+    {
+      "name": "檜洞丸",
+      "lat": 35.478997,
+      "lon": 139.102758,
+      "elev": 1601,
+      "azimuth": 237.4,
+      "distance_km": 54.3,
+      "angle_deg": 1.4275
+    },
+    {
+      "name": "姫次",
+      "lat": 35.510702,
+      "lon": 139.134161,
+      "elev": 1433,
+      "azimuth": 239.01,
+      "distance_km": 50.0,
+      "angle_deg": 1.3922
+    },
+    {
+      "name": "袖平山",
+      "lat": 35.510832,
+      "lon": 139.12619,
+      "elev": 1432,
+      "azimuth": 239.45,
+      "distance_km": 50.6,
+      "angle_deg": 1.3693
+    },
+    {
+      "name": "黍殻山",
+      "lat": 35.526391,
+      "lon": 139.149036,
+      "elev": 1273,
+      "azimuth": 239.95,
+      "distance_km": 48.0,
+      "angle_deg": 1.2769
+    },
+    {
+      "name": "宝永山",
+      "lat": 35.342939,
+      "lon": 138.752078,
+      "elev": 2693,
+      "azimuth": 240.4,
+      "distance_km": 89.4,
+      "angle_deg": 1.347
+    },
+    {
+      "name": "駒ヶ岳",
+      "lat": 35.359465,
+      "lon": 138.731431,
+      "elev": 3718,
+      "azimuth": 242.01,
+      "distance_km": 90.1,
+      "angle_deg": 1.9815
+    },
+    {
+      "name": "朝日岳",
+      "lat": 35.360692,
+      "lon": 138.733072,
+      "elev": 3733,
+      "azimuth": 242.04,
+      "distance_km": 89.9,
+      "angle_deg": 1.9969
+    },
+    {
+      "name": "浅間岳",
+      "lat": 35.360064,
+      "lon": 138.731549,
+      "elev": 3722,
+      "azimuth": 242.04,
+      "distance_km": 90.1,
+      "angle_deg": 1.9853
+    },
+    {
+      "name": "三島岳",
+      "lat": 35.359467,
+      "lon": 138.730213,
+      "elev": 3734,
+      "azimuth": 242.04,
+      "distance_km": 90.2,
+      "angle_deg": 1.9887
+    },
+    {
+      "name": "伊豆岳",
+      "lat": 35.362754,
+      "lon": 138.733244,
+      "elev": 3749,
+      "azimuth": 242.16,
+      "distance_km": 89.8,
+      "angle_deg": 2.0108
+    },
+    {
+      "name": "剣ヶ峰",
+      "lat": 35.360681,
+      "lon": 138.727351,
+      "elev": 3776,
+      "azimuth": 242.2,
+      "distance_km": 90.4,
+      "angle_deg": 2.0106
+    },
+    {
+      "name": "成就岳",
+      "lat": 35.36427,
+      "lon": 138.733512,
+      "elev": 3734,
+      "azimuth": 242.25,
+      "distance_km": 89.7,
+      "angle_deg": 2.0043
+    },
+    {
+      "name": "久須志岳",
+      "lat": 35.365783,
+      "lon": 138.732279,
+      "elev": 3725,
+      "azimuth": 242.38,
+      "distance_km": 89.7,
+      "angle_deg": 1.9979
+    },
+    {
+      "name": "白山岳",
+      "lat": 35.366569,
+      "lon": 138.729543,
+      "elev": 3756,
+      "azimuth": 242.5,
+      "distance_km": 89.9,
+      "angle_deg": 2.0123
+    },
+    {
+      "name": "前ノ岳",
+      "lat": 35.478705,
+      "lon": 138.929276,
+      "elev": 1471,
+      "azimuth": 244.6,
+      "distance_km": 68.1,
+      "angle_deg": 0.9327
+    },
+    {
+      "name": "御正体山",
+      "lat": 35.486904,
+      "lon": 138.931697,
+      "elev": 1682,
+      "azimuth": 245.21,
+      "distance_km": 67.5,
+      "angle_deg": 1.1245
+    },
+    {
+      "name": "長尾",
+      "lat": 35.54525,
+      "lon": 139.066916,
+      "elev": 1107,
+      "azimuth": 245.91,
+      "distance_km": 53.6,
+      "angle_deg": 0.9231
+    },
+    {
+      "name": "菜畑山",
+      "lat": 35.528307,
+      "lon": 139.006172,
+      "elev": 1283,
+      "azimuth": 246.45,
+      "distance_km": 59.4,
+      "angle_deg": 0.9596
+    },
+    {
+      "name": "今倉山・東峰",
+      "lat": 35.521316,
+      "lon": 138.974393,
+      "elev": 1470,
+      "azimuth": 246.88,
+      "distance_km": 62.4,
+      "angle_deg": 1.0637
+    },
+    {
+      "name": "鹿留山",
+      "lat": 35.487979,
+      "lon": 138.8784,
+      "elev": 1632,
+      "azimuth": 246.94,
+      "distance_km": 71.8,
+      "angle_deg": 0.9834
+    },
+    {
+      "name": "松山（赤岩）",
+      "lat": 35.522058,
+      "lon": 138.962836,
+      "elev": 1410,
+      "azimuth": 247.32,
+      "distance_km": 63.3,
+      "angle_deg": 0.9863
+    },
+    {
+      "name": "赤鞍ヶ岳",
+      "lat": 35.544405,
+      "lon": 139.024814,
+      "elev": 1299,
+      "azimuth": 247.4,
+      "distance_km": 57.2,
+      "angle_deg": 1.0317
+    },
+    {
+      "name": "二十六夜山",
+      "lat": 35.527629,
+      "lon": 138.946846,
+      "elev": 1297,
+      "azimuth": 248.33,
+      "distance_km": 64.4,
+      "angle_deg": 0.8606
+    },
+    {
+      "name": "倉見山",
+      "lat": 35.507955,
+      "lon": 138.855716,
+      "elev": 1256,
+      "azimuth": 249.19,
+      "distance_km": 72.9,
+      "angle_deg": 0.6656
+    },
+    {
+      "name": "毛無山",
+      "lat": 35.415806,
+      "lon": 138.543871,
+      "elev": 1964,
+      "azimuth": 249.62,
+      "distance_km": 103.0,
+      "angle_deg": 0.6639
+    },
+    {
+      "name": "小仏城山",
+      "lat": 35.629869,
+      "lon": 139.22117,
+      "elev": 670,
+      "azimuth": 250.21,
+      "distance_km": 37.1,
+      "angle_deg": 0.8174
+    },
+    {
+      "name": "細野山",
+      "lat": 35.582772,
+      "lon": 139.031127,
+      "elev": 838,
+      "azimuth": 251.25,
+      "distance_km": 55.1,
+      "angle_deg": 0.6074
+    },
+    {
+      "name": "霜山",
+      "lat": 35.519829,
+      "lon": 138.795041,
+      "elev": 1302,
+      "azimuth": 251.57,
+      "distance_km": 77.6,
+      "angle_deg": 0.6229
+    },
+    {
+      "name": "高畑山",
+      "lat": 35.579358,
+      "lon": 139.00403,
+      "elev": 982,
+      "azimuth": 251.7,
+      "distance_km": 57.5,
+      "angle_deg": 0.7062
+    },
+    {
+      "name": "倉岳山",
+      "lat": 35.584032,
+      "lon": 139.019837,
+      "elev": 990,
+      "azimuth": 251.73,
+      "distance_km": 56.0,
+      "angle_deg": 0.7457
+    },
+    {
+      "name": "富士見台",
+      "lat": 35.648683,
+      "lon": 139.243504,
+      "elev": 612,
+      "azimuth": 252.32,
+      "distance_km": 34.5,
+      "angle_deg": 0.8031
+    },
+    {
+      "name": "景信山",
+      "lat": 35.646009,
+      "lon": 139.215893,
+      "elev": 727,
+      "azimuth": 253.07,
+      "distance_km": 37.0,
+      "angle_deg": 0.9088
+    },
+    {
+      "name": "三ツ峠山",
+      "lat": 35.549165,
+      "lon": 138.809164,
+      "elev": 1785,
+      "azimuth": 253.59,
+      "distance_km": 75.4,
+      "angle_deg": 1.0261
+    },
+    {
+      "name": "御巣鷹山",
+      "lat": 35.553855,
+      "lon": 138.807905,
+      "elev": 1775,
+      "azimuth": 254.0,
+      "distance_km": 75.4,
+      "angle_deg": 1.0193
+    },
+    {
+      "name": "節刀ヶ岳",
+      "lat": 35.528476,
+      "lon": 138.683459,
+      "elev": 1736,
+      "azimuth": 254.33,
+      "distance_km": 87.0,
+      "angle_deg": 0.7726
+    },
+    {
+      "name": "茶臼山",
+      "lat": 35.559547,
+      "lon": 138.801716,
+      "elev": 1513,
+      "azimuth": 254.57,
+      "distance_km": 75.7,
+      "angle_deg": 0.8134
+    },
+    {
+      "name": "杉の丸",
+      "lat": 35.65648,
+      "lon": 139.221239,
+      "elev": 612,
+      "azimuth": 254.6,
+      "distance_km": 36.2,
+      "angle_deg": 0.7529
+    },
+    {
+      "name": "中藤山",
+      "lat": 35.541323,
+      "lon": 138.721918,
+      "elev": 1665,
+      "azimuth": 254.6,
+      "distance_km": 83.2,
+      "angle_deg": 0.7885
+    },
+    {
+      "name": "堂所山",
+      "lat": 35.652425,
+      "lon": 139.194059,
+      "elev": 733,
+      "azimuth": 254.94,
+      "distance_km": 38.7,
+      "angle_deg": 0.8647
+    },
+    {
+      "name": "御坂山",
+      "lat": 35.558904,
+      "lon": 138.772941,
+      "elev": 1596,
+      "azimuth": 255.05,
+      "distance_km": 78.3,
+      "angle_deg": 0.8284
+    },
+    {
+      "name": "八丁山",
+      "lat": 35.568322,
+      "lon": 138.792914,
+      "elev": 1580,
+      "azimuth": 255.44,
+      "distance_km": 76.2,
+      "angle_deg": 0.8543
+    },
+    {
+      "name": "清八山",
+      "lat": 35.572982,
+      "lon": 138.79971,
+      "elev": 1593,
+      "azimuth": 255.7,
+      "distance_km": 75.5,
+      "angle_deg": 0.8782
+    },
+    {
+      "name": "本社ヶ丸",
+      "lat": 35.574824,
+      "lon": 138.807328,
+      "elev": 1631,
+      "azimuth": 255.72,
+      "distance_km": 74.8,
+      "angle_deg": 0.9212
+    },
+    {
+      "name": "陣馬山",
+      "lat": 35.652169,
+      "lon": 139.166513,
+      "elev": 857,
+      "azimuth": 255.82,
+      "distance_km": 41.1,
+      "angle_deg": 0.9682
+    },
+    {
+      "name": "釈迦ヶ岳",
+      "lat": 35.562919,
+      "lon": 138.720951,
+      "elev": 1641,
+      "azimuth": 256.21,
+      "distance_km": 82.7,
+      "angle_deg": 0.7812
+    },
+    {
+      "name": "扇山",
+      "lat": 35.637329,
+      "lon": 139.013652,
+      "elev": 1138,
+      "azimuth": 257.77,
+      "distance_km": 55.0,
+      "angle_deg": 0.9222
+    },
+    {
+      "name": "醍醐丸",
+      "lat": 35.667705,
+      "lon": 139.161365,
+      "elev": 867,
+      "azimuth": 258.31,
+      "distance_km": 41.2,
+      "angle_deg": 0.9802
+    },
+    {
+      "name": "連行峰",
+      "lat": 35.669989,
+      "lon": 139.142676,
+      "elev": 1016,
+      "azimuth": 259.11,
+      "distance_km": 42.8,
+      "angle_deg": 1.1305
+    },
+    {
+      "name": "茅丸",
+      "lat": 35.672348,
+      "lon": 139.13651,
+      "elev": 1019,
+      "azimuth": 259.59,
+      "distance_km": 43.3,
+      "angle_deg": 1.1176
+    },
+    {
+      "name": "三国峠",
+      "lat": 35.671946,
+      "lon": 139.130975,
+      "elev": 960,
+      "azimuth": 259.65,
+      "distance_km": 43.8,
+      "angle_deg": 1.0237
+    },
+    {
+      "name": "生藤山",
+      "lat": 35.672421,
+      "lon": 139.132394,
+      "elev": 990,
+      "azimuth": 259.69,
+      "distance_km": 43.7,
+      "angle_deg": 1.0677
+    },
+    {
+      "name": "滝子山",
+      "lat": 35.630354,
+      "lon": 138.851172,
+      "elev": 1620,
+      "azimuth": 259.8,
+      "distance_km": 69.5,
+      "angle_deg": 1.0241
+    },
+    {
+      "name": "雨降山",
+      "lat": 35.664568,
+      "lon": 139.038458,
+      "elev": 1177,
+      "azimuth": 260.47,
+      "distance_km": 52.2,
+      "angle_deg": 1.037
+    },
+    {
+      "name": "権現山",
+      "lat": 35.667901,
+      "lon": 139.021446,
+      "elev": 1312,
+      "azimuth": 261.14,
+      "distance_km": 53.6,
+      "angle_deg": 1.1417
+    },
+    {
+      "name": "大谷ヶ丸",
+      "lat": 35.64456,
+      "lon": 138.846118,
+      "elev": 1644,
+      "azimuth": 261.14,
+      "distance_km": 69.7,
+      "angle_deg": 1.0397
+    },
+    {
+      "name": "麻生山",
+      "lat": 35.671213,
+      "lon": 138.999341,
+      "elev": 1268,
+      "azimuth": 261.85,
+      "distance_km": 55.6,
+      "angle_deg": 1.0417
+    },
+    {
+      "name": "ハマイバ丸",
+      "lat": 35.661748,
+      "lon": 138.849577,
+      "elev": 1752,
+      "azimuth": 262.66,
+      "distance_km": 69.1,
+      "angle_deg": 1.1429
+    },
+    {
+      "name": "大蔵高丸",
+      "lat": 35.672814,
+      "lon": 138.846818,
+      "elev": 1781,
+      "azimuth": 263.69,
+      "distance_km": 69.2,
+      "angle_deg": 1.1646
+    },
+    {
+      "name": "姥子山",
+      "lat": 35.678897,
+      "lon": 138.896511,
+      "elev": 1503,
+      "azimuth": 263.82,
+      "distance_km": 64.7,
+      "angle_deg": 1.0371
+    },
+    {
+      "name": "白谷小丸",
+      "lat": 35.683054,
+      "lon": 138.858699,
+      "elev": 1890,
+      "azimuth": 264.54,
+      "distance_km": 68.0,
+      "angle_deg": 1.2862
+    },
+    {
+      "name": "白谷ノ丸",
+      "lat": 35.684473,
+      "lon": 138.858074,
+      "elev": 1920,
+      "azimuth": 264.67,
+      "distance_km": 68.1,
+      "angle_deg": 1.3104
+    },
+    {
+      "name": "雁ヶ腹摺山",
+      "lat": 35.686791,
+      "lon": 138.884806,
+      "elev": 1874,
+      "azimuth": 264.68,
+      "distance_km": 65.6,
+      "angle_deg": 1.3382
+    },
+    {
+      "name": "赤岩ノ丸",
+      "lat": 35.686702,
+      "lon": 138.87003,
+      "elev": 1792,
+      "azimuth": 264.79,
+      "distance_km": 67.0,
+      "angle_deg": 1.2312
+    },
+    {
+      "name": "黒岳",
+      "lat": 35.688555,
+      "lon": 138.859784,
+      "elev": 1988,
+      "azimuth": 265.04,
+      "distance_km": 67.9,
+      "angle_deg": 1.3728
+    },
+    {
+      "name": "大樺ノ頭",
+      "lat": 35.694833,
+      "lon": 138.893055,
+      "elev": 1777,
+      "azimuth": 265.4,
+      "distance_km": 64.8,
+      "angle_deg": 1.2758
+    },
+    {
+      "name": "牛奥ノ雁ヶ腹摺山",
+      "lat": 35.705936,
+      "lon": 138.856672,
+      "elev": 1990,
+      "azimuth": 266.68,
+      "distance_km": 68.0,
+      "angle_deg": 1.3713
+    },
+    {
+      "name": "小金沢山",
+      "lat": 35.716955,
+      "lon": 138.85662,
+      "elev": 2014,
+      "azimuth": 267.71,
+      "distance_km": 67.9,
+      "angle_deg": 1.3937
+    },
+    {
+      "name": "大沢山",
+      "lat": 35.733347,
+      "lon": 139.014984,
+      "elev": 1482,
+      "azimuth": 268.94,
+      "distance_km": 53.6,
+      "angle_deg": 1.3262
+    },
+    {
+      "name": "三頭山 東峰",
+      "lat": 35.738564,
+      "lon": 139.014069,
+      "elev": 1528,
+      "azimuth": 269.56,
+      "distance_km": 53.6,
+      "angle_deg": 1.3725
+    },
+    {
+      "name": "三頭山 西峰",
+      "lat": 35.738937,
+      "lon": 139.012231,
+      "elev": 1527,
+      "azimuth": 269.6,
+      "distance_km": 53.8,
+      "angle_deg": 1.3664
+    },
+    {
+      "name": "三頭山 中央峰",
+      "lat": 35.738961,
+      "lon": 139.013825,
+      "elev": 1531,
+      "azimuth": 269.6,
+      "distance_km": 53.6,
+      "angle_deg": 1.3755
+    },
+    {
+      "name": "大菩薩嶺",
+      "lat": 35.748717,
+      "lon": 138.84548,
+      "elev": 2057,
+      "azimuth": 270.68,
+      "distance_km": 68.9,
+      "angle_deg": 1.403
+    },
+    {
+      "name": "大岳山",
+      "lat": 35.765196,
+      "lon": 139.130365,
+      "elev": 1266,
+      "azimuth": 273.3,
+      "distance_km": 43.2,
+      "angle_deg": 1.4505
+    },
+    {
+      "name": "御前山",
+      "lat": 35.77013,
+      "lon": 139.080571,
+      "elev": 1405,
+      "azimuth": 273.67,
+      "distance_km": 47.7,
+      "angle_deg": 1.4455
+    },
+    {
+      "name": "惣岳山",
+      "lat": 35.772019,
+      "lon": 139.07538,
+      "elev": 1341,
+      "azimuth": 273.89,
+      "distance_km": 48.2,
+      "angle_deg": 1.3512
+    },
+    {
+      "name": "鶏冠山",
+      "lat": 35.789544,
+      "lon": 138.839312,
+      "elev": 1716,
+      "azimuth": 274.41,
+      "distance_km": 69.6,
+      "angle_deg": 1.1022
+    },
+    {
+      "name": "鋸山",
+      "lat": 35.779241,
+      "lon": 139.105948,
+      "elev": 1109,
+      "azimuth": 275.11,
+      "distance_km": 45.5,
+      "angle_deg": 1.1609
+    },
+    {
+      "name": "鍋割山",
+      "lat": 35.778092,
+      "lon": 139.13711,
+      "elev": 1084,
+      "azimuth": 275.26,
+      "distance_km": 42.6,
+      "angle_deg": 1.2268
+    },
+    {
+      "name": "丹波天平",
+      "lat": 35.799789,
+      "lon": 138.931068,
+      "elev": 1343,
+      "azimuth": 276.01,
+      "distance_km": 61.4,
+      "angle_deg": 0.9691
+    },
+    {
+      "name": "日の出山",
+      "lat": 35.781241,
+      "lon": 139.167471,
+      "elev": 902,
+      "azimuth": 276.1,
+      "distance_km": 39.9,
+      "angle_deg": 1.0706
+    },
+    {
+      "name": "御岳山",
+      "lat": 35.782814,
+      "lon": 139.149485,
+      "elev": 929,
+      "azimuth": 276.11,
+      "distance_km": 41.6,
+      "angle_deg": 1.0531
+    },
+    {
+      "name": "乾徳山",
+      "lat": 35.822838,
+      "lon": 138.714926,
+      "elev": 2031,
+      "azimuth": 276.47,
+      "distance_km": 81.1,
+      "angle_deg": 1.0844
+    },
+    {
+      "name": "遠見山",
+      "lat": 35.832328,
+      "lon": 138.673219,
+      "elev": 2234,
+      "azimuth": 276.91,
+      "distance_km": 85.0,
+      "angle_deg": 1.1425
+    },
+    {
+      "name": "笠盛山",
+      "lat": 35.83275,
+      "lon": 138.710827,
+      "elev": 2072,
+      "azimuth": 277.21,
+      "distance_km": 81.6,
+      "angle_deg": 1.1028
+    },
+    {
+      "name": "トサカ",
+      "lat": 35.834863,
+      "lon": 138.693483,
+      "elev": 2047,
+      "azimuth": 277.25,
+      "distance_km": 83.2,
+      "angle_deg": 1.0524
+    },
+    {
+      "name": "赤指山",
+      "lat": 35.808156,
+      "lon": 138.976824,
+      "elev": 1332,
+      "azimuth": 277.33,
+      "distance_km": 57.4,
+      "angle_deg": 1.0588
+    },
+    {
+      "name": "大塚山",
+      "lat": 35.792488,
+      "lon": 139.146871,
+      "elev": 920,
+      "azimuth": 277.54,
+      "distance_km": 41.9,
+      "angle_deg": 1.0295
+    },
+    {
+      "name": "熊倉山",
+      "lat": 35.817935,
+      "lon": 138.904363,
+      "elev": 1624,
+      "azimuth": 277.59,
+      "distance_km": 64.0,
+      "angle_deg": 1.1606
+    },
+    {
+      "name": "黒金山",
+      "lat": 35.841301,
+      "lon": 138.70981,
+      "elev": 2232,
+      "azimuth": 277.86,
+      "distance_km": 81.8,
+      "angle_deg": 1.2102
+    },
+    {
+      "name": "六ツ石山",
+      "lat": 35.817269,
+      "lon": 139.046447,
+      "elev": 1479,
+      "azimuth": 279.31,
+      "distance_km": 51.3,
+      "angle_deg": 1.3981
+    },
+    {
+      "name": "七ッ石山",
+      "lat": 35.829751,
+      "lon": 138.961809,
+      "elev": 1757,
+      "azimuth": 279.48,
+      "distance_km": 59.1,
+      "angle_deg": 1.4272
+    },
+    {
+      "name": "大洞山",
+      "lat": 35.839798,
+      "lon": 138.892209,
+      "elev": 2077,
+      "azimuth": 279.57,
+      "distance_km": 65.5,
+      "angle_deg": 1.5204
+    },
+    {
+      "name": "北奥千丈岳",
+      "lat": 35.86863,
+      "lon": 138.670727,
+      "elev": 2601,
+      "azimuth": 279.57,
+      "distance_km": 85.7,
+      "angle_deg": 1.3715
+    },
+    {
+      "name": "国師ヶ岳",
+      "lat": 35.870839,
+      "lon": 138.672964,
+      "elev": 2592,
+      "azimuth": 279.76,
+      "distance_km": 85.6,
+      "angle_deg": 1.3692
+    },
+    {
+      "name": "日蔭名栗山",
+      "lat": 35.828342,
+      "lon": 138.992401,
+      "elev": 1725,
+      "azimuth": 279.77,
+      "distance_km": 56.3,
+      "angle_deg": 1.4864
+    },
+    {
+      "name": "将門馬場",
+      "lat": 35.822531,
+      "lon": 139.03784,
+      "elev": 1455,
+      "azimuth": 279.81,
+      "distance_km": 52.2,
+      "angle_deg": 1.3423
+    },
+    {
+      "name": "城山",
+      "lat": 35.824218,
+      "lon": 139.029581,
+      "elev": 1523,
+      "azimuth": 279.87,
+      "distance_km": 52.9,
+      "angle_deg": 1.3904
+    },
+    {
+      "name": "高丸山",
+      "lat": 35.833038,
+      "lon": 138.983966,
+      "elev": 1733,
+      "azimuth": 280.16,
+      "distance_km": 57.2,
+      "angle_deg": 1.4661
+    },
+    {
+      "name": "大常木山",
+      "lat": 35.847442,
+      "lon": 138.881807,
+      "elev": 1962,
+      "azimuth": 280.17,
+      "distance_km": 66.5,
+      "angle_deg": 1.3888
+    },
+    {
+      "name": "鷹巣山",
+      "lat": 35.829891,
+      "lon": 139.012322,
+      "elev": 1737,
+      "azimuth": 280.25,
+      "distance_km": 54.6,
+      "angle_deg": 1.56
+    },
+    {
+      "name": "竜喰山",
+      "lat": 35.854929,
+      "lon": 138.87232,
+      "elev": 2012,
+      "azimuth": 280.74,
+      "distance_km": 67.5,
+      "angle_deg": 1.4031
+    },
+    {
+      "name": "三ッ山",
+      "lat": 35.8524,
+      "lon": 138.910436,
+      "elev": 1949,
+      "azimuth": 281.04,
+      "distance_km": 64.1,
+      "angle_deg": 1.45
+    },
+    {
+      "name": "小雲取山",
+      "lat": 35.849439,
+      "lon": 138.948457,
+      "elev": 1937,
+      "azimuth": 281.34,
+      "distance_km": 60.7,
+      "angle_deg": 1.5481
+    },
+    {
+      "name": "唐松尾山",
+      "lat": 35.867688,
+      "lon": 138.845395,
+      "elev": 2109,
+      "azimuth": 281.52,
+      "distance_km": 70.2,
+      "angle_deg": 1.4092
+    },
+    {
+      "name": "雲取山",
+      "lat": 35.855535,
+      "lon": 138.943929,
+      "elev": 2017,
+      "azimuth": 281.89,
+      "distance_km": 61.2,
+      "angle_deg": 1.6054
+    },
+    {
+      "name": "西仙波",
+      "lat": 35.874529,
+      "lon": 138.868482,
+      "elev": 1983,
+      "azimuth": 282.48,
+      "distance_km": 68.3,
+      "angle_deg": 1.3573
+    },
+    {
+      "name": "東仙波",
+      "lat": 35.875355,
+      "lon": 138.873039,
+      "elev": 2003,
+      "azimuth": 282.63,
+      "distance_km": 67.9,
+      "angle_deg": 1.385
+    },
+    {
+      "name": "木賊山",
+      "lat": 35.904031,
+      "lon": 138.733938,
+      "elev": 2469,
+      "azimuth": 282.96,
+      "distance_km": 80.9,
+      "angle_deg": 1.3999
+    },
+    {
+      "name": "東破風山",
+      "lat": 35.899012,
+      "lon": 138.76557,
+      "elev": 2180,
+      "azimuth": 283.01,
+      "distance_km": 77.9,
+      "angle_deg": 1.2631
+    },
+    {
+      "name": "富士見",
+      "lat": 35.909966,
+      "lon": 138.707948,
+      "elev": 2373,
+      "azimuth": 283.05,
+      "distance_km": 83.3,
+      "angle_deg": 1.2744
+    },
+    {
+      "name": "水師",
+      "lat": 35.908213,
+      "lon": 138.719195,
+      "elev": 2396,
+      "azimuth": 283.08,
+      "distance_km": 82.3,
+      "angle_deg": 1.3145
+    },
+    {
+      "name": "破風山",
+      "lat": 35.901854,
+      "lon": 138.758769,
+      "elev": 2318,
+      "azimuth": 283.14,
+      "distance_km": 78.6,
+      "angle_deg": 1.3475
+    },
+    {
+      "name": "雁坂嶺",
+      "lat": 35.898793,
+      "lon": 138.781411,
+      "elev": 2289,
+      "azimuth": 283.23,
+      "distance_km": 76.5,
+      "angle_deg": 1.3791
+    },
+    {
+      "name": "甲武信ヶ岳",
+      "lat": 35.909183,
+      "lon": 138.728873,
+      "elev": 2475,
+      "azimuth": 283.28,
+      "distance_km": 81.4,
+      "angle_deg": 1.39
+    },
+    {
+      "name": "天祖山",
+      "lat": 35.864435,
+      "lon": 138.989928,
+      "elev": 1723,
+      "azimuth": 283.68,
+      "distance_km": 57.3,
+      "angle_deg": 1.4508
+    },
+    {
+      "name": "三宝山",
+      "lat": 35.917627,
+      "lon": 138.72782,
+      "elev": 2484,
+      "azimuth": 283.91,
+      "distance_km": 81.7,
+      "angle_deg": 1.3884
+    },
+    {
+      "name": "白岩山",
+      "lat": 35.878849,
+      "lon": 138.952252,
+      "elev": 1921,
+      "azimuth": 284.41,
+      "distance_km": 61.0,
+      "angle_deg": 1.521
+    },
+    {
+      "name": "武信白岩山南峰",
+      "lat": 35.926902,
+      "lon": 138.737714,
+      "elev": 2288,
+      "azimuth": 284.76,
+      "distance_km": 81.1,
+      "angle_deg": 1.2659
+    },
+    {
+      "name": "川苔山",
+      "lat": 35.850806,
+      "lon": 139.106885,
+      "elev": 1363,
+      "azimuth": 284.87,
+      "distance_km": 46.7,
+      "angle_deg": 1.4315
+    },
+    {
+      "name": "和名倉山",
+      "lat": 35.899423,
+      "lon": 138.877996,
+      "elev": 2036,
+      "azimuth": 284.91,
+      "distance_km": 68.1,
+      "angle_deg": 1.4077
+    },
+    {
+      "name": "ウトウの頭",
+      "lat": 35.873094,
+      "lon": 139.011266,
+      "elev": 1588,
+      "azimuth": 285.1,
+      "distance_km": 55.7,
+      "angle_deg": 1.3673
+    },
+    {
+      "name": "水松山",
+      "lat": 35.881205,
+      "lon": 138.98873,
+      "elev": 1699,
+      "azimuth": 285.45,
+      "distance_km": 57.9,
+      "angle_deg": 1.4083
+    },
+    {
+      "name": "長沢山",
+      "lat": 35.88395,
+      "lon": 138.976899,
+      "elev": 1738,
+      "azimuth": 285.46,
+      "distance_km": 59.0,
+      "angle_deg": 1.411
+    },
+    {
+      "name": "タワ尾根ノ頭",
+      "lat": 35.883661,
+      "lon": 139.001229,
+      "elev": 1710,
+      "azimuth": 286.01,
+      "distance_km": 56.9,
+      "angle_deg": 1.4525
+    },
+    {
+      "name": "日向沢ノ峰",
+      "lat": 35.865471,
+      "lon": 139.10139,
+      "elev": 1356,
+      "azimuth": 286.61,
+      "distance_km": 47.6,
+      "angle_deg": 1.3884
+    },
+    {
+      "name": "天目山",
+      "lat": 35.877241,
+      "lon": 139.058179,
+      "elev": 1576,
+      "azimuth": 286.79,
+      "distance_km": 51.7,
+      "angle_deg": 1.4906
+    },
+    {
+      "name": "桂谷ノ峰",
+      "lat": 35.869269,
+      "lon": 139.093862,
+      "elev": 1380,
+      "azimuth": 286.87,
+      "distance_km": 48.4,
+      "angle_deg": 1.3887
+    },
+    {
+      "name": "蕎麦粒山",
+      "lat": 35.872154,
+      "lon": 139.087188,
+      "elev": 1473,
+      "azimuth": 287.02,
+      "distance_km": 49.1,
+      "angle_deg": 1.4729
+    },
+    {
+      "name": "立橋",
+      "lat": 35.883829,
+      "lon": 139.044448,
+      "elev": 1591,
+      "azimuth": 287.17,
+      "distance_km": 53.1,
+      "angle_deg": 1.4568
+    },
+    {
+      "name": "仙元峠",
+      "lat": 35.874837,
+      "lon": 139.082583,
+      "elev": 1444,
+      "azimuth": 287.22,
+      "distance_km": 49.6,
+      "angle_deg": 1.4214
+    },
+    {
+      "name": "七跳山",
+      "lat": 35.890161,
+      "lon": 139.035208,
+      "elev": 1651,
+      "azimuth": 287.62,
+      "distance_km": 54.2,
+      "angle_deg": 1.4855
+    },
+    {
+      "name": "酉谷山",
+      "lat": 35.897121,
+      "lon": 139.010326,
+      "elev": 1718,
+      "azimuth": 287.69,
+      "distance_km": 56.5,
+      "angle_deg": 1.4731
+    },
+    {
+      "name": "日向谷ノ頭",
+      "lat": 35.897591,
+      "lon": 139.020032,
+      "elev": 1702,
+      "azimuth": 288.01,
+      "distance_km": 55.7,
+      "angle_deg": 1.4845
+    },
+    {
+      "name": "小黒",
+      "lat": 35.90089,
+      "lon": 139.010508,
+      "elev": 1650,
+      "azimuth": 288.1,
+      "distance_km": 56.6,
+      "angle_deg": 1.4003
+    },
+    {
+      "name": "大平山",
+      "lat": 35.893891,
+      "lon": 139.04615,
+      "elev": 1603,
+      "azimuth": 288.36,
+      "distance_km": 53.3,
+      "angle_deg": 1.4631
+    },
+    {
+      "name": "立橋山",
+      "lat": 35.904481,
+      "lon": 139.026329,
+      "elev": 1530,
+      "azimuth": 288.94,
+      "distance_km": 55.4,
+      "angle_deg": 1.3172
+    },
+    {
+      "name": "檜岳",
+      "lat": 35.913802,
+      "lon": 138.99919,
+      "elev": 1451,
+      "azimuth": 289.14,
+      "distance_km": 58.1,
+      "angle_deg": 1.1589
+    },
+    {
+      "name": "赤岩ノ頭",
+      "lat": 35.907561,
+      "lon": 139.031265,
+      "elev": 1448,
+      "azimuth": 289.43,
+      "distance_km": 55.1,
+      "angle_deg": 1.2418
+    },
+    {
+      "name": "蝉笹山",
+      "lat": 35.920535,
+      "lon": 138.99553,
+      "elev": 1440,
+      "azimuth": 289.73,
+      "distance_km": 58.6,
+      "angle_deg": 1.1328
+    },
+    {
+      "name": "有間山 タタラノ頭",
+      "lat": 35.886637,
+      "lon": 139.115978,
+      "elev": 1214,
+      "azimuth": 289.81,
+      "distance_km": 47.1,
+      "angle_deg": 1.235
+    },
+    {
+      "name": "矢岳",
+      "lat": 35.916252,
+      "lon": 139.030764,
+      "elev": 1358,
+      "azimuth": 290.36,
+      "distance_km": 55.5,
+      "angle_deg": 1.1378
+    },
+    {
+      "name": "有間山 橋小屋ノ頭",
+      "lat": 35.895207,
+      "lon": 139.120733,
+      "elev": 1163,
+      "azimuth": 291.07,
+      "distance_km": 47.0,
+      "angle_deg": 1.176
+    },
+    {
+      "name": "藤棚山",
+      "lat": 35.891416,
+      "lon": 139.142569,
+      "elev": 920,
+      "azimuth": 291.46,
+      "distance_km": 45.0,
+      "angle_deg": 0.9352
+    },
+    {
+      "name": "蕨山",
+      "lat": 35.89634,
+      "lon": 139.131919,
+      "elev": 1044,
+      "azimuth": 291.67,
+      "distance_km": 46.1,
+      "angle_deg": 1.0582
+    },
+    {
+      "name": "ヤシンタイノ頭",
+      "lat": 35.900726,
+      "lon": 139.118948,
+      "elev": 1100,
+      "azimuth": 291.7,
+      "distance_km": 47.4,
+      "angle_deg": 1.0878
+    },
+    {
+      "name": "滝入ノ頭",
+      "lat": 35.90435,
+      "lon": 139.114755,
+      "elev": 1071,
+      "azimuth": 291.98,
+      "distance_km": 47.9,
+      "angle_deg": 1.0378
+    },
+    {
+      "name": "横箱山",
+      "lat": 36.002065,
+      "lon": 138.839716,
+      "elev": 1477,
+      "azimuth": 292.7,
+      "distance_km": 75.0,
+      "angle_deg": 0.7998
+    },
+    {
+      "name": "横倉山",
+      "lat": 35.925009,
+      "lon": 139.103361,
+      "elev": 1197,
+      "azimuth": 294.0,
+      "distance_km": 49.7,
+      "angle_deg": 1.1307
+    },
+    {
+      "name": "大持山",
+      "lat": 35.928524,
+      "lon": 139.10055,
+      "elev": 1294,
+      "azimuth": 294.29,
+      "distance_km": 50.1,
+      "angle_deg": 1.2298
+    },
+    {
+      "name": "小持山",
+      "lat": 35.935332,
+      "lon": 139.095768,
+      "elev": 1273,
+      "azimuth": 294.87,
+      "distance_km": 50.8,
+      "angle_deg": 1.1835
+    },
+    {
+      "name": "前武川岳",
+      "lat": 35.932883,
+      "lon": 139.133548,
+      "elev": 1003,
+      "azimuth": 296.28,
+      "distance_km": 47.6,
+      "angle_deg": 0.9642
+    },
+    {
+      "name": "武甲山",
+      "lat": 35.951612,
+      "lon": 139.097776,
+      "elev": 1304,
+      "azimuth": 296.78,
+      "distance_km": 51.4,
+      "angle_deg": 1.1991
+    },
+    {
+      "name": "蔦岩山",
+      "lat": 35.943651,
+      "lon": 139.128206,
+      "elev": 1004,
+      "azimuth": 297.29,
+      "distance_km": 48.6,
+      "angle_deg": 0.9388
+    },
+    {
+      "name": "焼山",
+      "lat": 35.953946,
+      "lon": 139.129615,
+      "elev": 850,
+      "azimuth": 298.55,
+      "distance_km": 49.0,
+      "angle_deg": 0.7475
+    },
+    {
+      "name": "川越山",
+      "lat": 35.945996,
+      "lon": 139.162436,
+      "elev": 780,
+      "azimuth": 299.33,
+      "distance_km": 46.0,
+      "angle_deg": 0.7338
+    },
+    {
+      "name": "正丸山",
+      "lat": 35.948919,
+      "lon": 139.163552,
+      "elev": 766,
+      "azimuth": 299.74,
+      "distance_km": 46.1,
+      "angle_deg": 0.7153
+    },
+    {
+      "name": "二子山",
+      "lat": 35.96189,
+      "lon": 139.138014,
+      "elev": 883,
+      "azimuth": 299.88,
+      "distance_km": 48.8,
+      "angle_deg": 0.7914
+    },
+    {
+      "name": "甲仁田山",
+      "lat": 35.959309,
+      "lon": 139.145447,
+      "elev": 847,
+      "azimuth": 299.98,
+      "distance_km": 48.1,
+      "angle_deg": 0.7665
+    },
+    {
+      "name": "二子山雌岳",
+      "lat": 35.963041,
+      "lon": 139.138013,
+      "elev": 870,
+      "azimuth": 300.02,
+      "distance_km": 48.8,
+      "angle_deg": 0.775
+    },
+    {
+      "name": "虚空蔵山",
+      "lat": 35.937847,
+      "lon": 139.221029,
+      "elev": 619,
+      "azimuth": 301.82,
+      "distance_km": 41.0,
+      "angle_deg": 0.6399
+    },
+    {
+      "name": "ツツジ山",
+      "lat": 35.967194,
+      "lon": 139.186134,
+      "elev": 879,
+      "azimuth": 303.24,
+      "distance_km": 45.4,
+      "angle_deg": 0.8739
+    },
+    {
+      "name": "丸山",
+      "lat": 35.988614,
+      "lon": 139.159629,
+      "elev": 960,
+      "azimuth": 304.06,
+      "distance_km": 48.7,
+      "angle_deg": 0.8853
+    },
+    {
+      "name": "川木沢ノ頭",
+      "lat": 35.997739,
+      "lon": 139.176635,
+      "elev": 874,
+      "azimuth": 306.08,
+      "distance_km": 48.0,
+      "angle_deg": 0.8001
+    },
+    {
+      "name": "堂平山",
+      "lat": 36.005758,
+      "lon": 139.190081,
+      "elev": 876,
+      "azimuth": 307.8,
+      "distance_km": 47.6,
+      "angle_deg": 0.8131
+    },
+    {
+      "name": "大霧山",
+      "lat": 36.034458,
+      "lon": 139.156188,
+      "elev": 767,
+      "azimuth": 308.54,
+      "distance_km": 51.9,
+      "angle_deg": 0.5915
+    },
+    {
+      "name": "笠山",
+      "lat": 36.018498,
+      "lon": 139.189861,
+      "elev": 837,
+      "azimuth": 309.12,
+      "distance_km": 48.4,
+      "angle_deg": 0.7454
+    },
+    {
+      "name": "鼻曲山",
+      "lat": 36.410857,
+      "lon": 138.64534,
+      "elev": 1655,
+      "azimuth": 310.8,
+      "distance_km": 113.9,
+      "angle_deg": 0.3633
+    },
+    {
+      "name": "愛宕山",
+      "lat": 36.066189,
+      "lon": 139.156546,
+      "elev": 655,
+      "azimuth": 311.48,
+      "distance_km": 54.1,
+      "angle_deg": 0.4318
+    },
+    {
+      "name": "皇鈴山",
+      "lat": 36.07313,
+      "lon": 139.157417,
+      "elev": 679,
+      "azimuth": 312.15,
+      "distance_km": 54.6,
+      "angle_deg": 0.4501
+    },
+    {
+      "name": "浅間隠山",
+      "lat": 36.453695,
+      "lon": 138.652493,
+      "elev": 1757,
+      "azimuth": 312.79,
+      "distance_km": 116.6,
+      "angle_deg": 0.3845
+    },
+    {
+      "name": "登谷山",
+      "lat": 36.082532,
+      "lon": 139.156012,
+      "elev": 668,
+      "azimuth": 312.86,
+      "distance_km": 55.4,
+      "angle_deg": 0.4261
+    },
+    {
+      "name": "三沢雨乞山",
+      "lat": 36.086855,
+      "lon": 139.153572,
+      "elev": 658,
+      "azimuth": 313.07,
+      "distance_km": 55.9,
+      "angle_deg": 0.408
+    },
+    {
+      "name": "李が嶽",
+      "lat": 36.459807,
+      "lon": 138.835755,
+      "elev": 1292,
+      "azimuth": 319.08,
+      "distance_km": 105.5,
+      "angle_deg": 0.2637
+    },
+    {
+      "name": "榛名山・掃部ヶ岳",
+      "lat": 36.477412,
+      "lon": 138.85088,
+      "elev": 1449,
+      "azimuth": 320.32,
+      "distance_km": 106.1,
+      "angle_deg": 0.3422
+    },
+    {
+      "name": "三ッ峰山",
+      "lat": 36.461658,
+      "lon": 138.882304,
+      "elev": 1315,
+      "azimuth": 320.9,
+      "distance_km": 103.0,
+      "angle_deg": 0.3031
+    },
+    {
+      "name": "髭櫛山",
+      "lat": 36.486863,
+      "lon": 138.863907,
+      "elev": 1350,
+      "azimuth": 321.17,
+      "distance_km": 106.2,
+      "angle_deg": 0.2881
+    },
+    {
+      "name": "烏帽子ヶ岳",
+      "lat": 36.487501,
+      "lon": 138.874864,
+      "elev": 1363,
+      "azimuth": 321.61,
+      "distance_km": 105.6,
+      "angle_deg": 0.3011
+    },
+    {
+      "name": "相馬山 そうまさん",
+      "lat": 36.474488,
+      "lon": 138.90079,
+      "elev": 1411,
+      "azimuth": 322.11,
+      "distance_km": 103.0,
+      "angle_deg": 0.3557
+    },
+    {
+      "name": "孫岳 まごだけ",
+      "lat": 36.479699,
+      "lon": 138.906058,
+      "elev": 1272,
+      "azimuth": 322.51,
+      "distance_km": 103.2,
+      "angle_deg": 0.2767
+    },
+    {
+      "name": "二ツ岳雄岳",
+      "lat": 36.482094,
+      "lon": 138.905433,
+      "elev": 1340,
+      "azimuth": 322.58,
+      "distance_km": 103.4,
+      "angle_deg": 0.3118
+    },
+    {
+      "name": "二ツ岳雌岳",
+      "lat": 36.480649,
+      "lon": 138.908893,
+      "elev": 1306,
+      "azimuth": 322.66,
+      "distance_km": 103.1,
+      "angle_deg": 0.2964
+    },
+    {
+      "name": "稲包山",
+      "lat": 36.74334,
+      "lon": 138.789991,
+      "elev": 1598,
+      "azimuth": 326.74,
+      "distance_km": 133.0,
+      "angle_deg": 0.1479
+    },
+    {
+      "name": "中之岳",
+      "lat": 36.587105,
+      "lon": 138.930727,
+      "elev": 1188,
+      "azimuth": 327.17,
+      "distance_km": 111.6,
+      "angle_deg": 0.1494
+    },
+    {
+      "name": "小野子山",
+      "lat": 36.580741,
+      "lon": 138.937003,
+      "elev": 1208,
+      "azimuth": 327.22,
+      "distance_km": 110.7,
+      "angle_deg": 0.1682
+    },
+    {
+      "name": "三国山",
+      "lat": 36.772255,
+      "lon": 138.827692,
+      "elev": 1636,
+      "azimuth": 328.7,
+      "distance_km": 133.9,
+      "angle_deg": 0.1565
+    },
+    {
+      "name": "小出俣山",
+      "lat": 36.797357,
+      "lon": 138.889378,
+      "elev": 1749,
+      "azimuth": 331.34,
+      "distance_km": 133.5,
+      "angle_deg": 0.2085
+    },
+    {
+      "name": "川棚ノ頭",
+      "lat": 36.816048,
+      "lon": 138.903731,
+      "elev": 1846,
+      "azimuth": 332.24,
+      "distance_km": 134.7,
+      "angle_deg": 0.2382
+    },
+    {
+      "name": "荒山",
+      "lat": 36.52586,
+      "lon": 139.165504,
+      "elev": 1572,
+      "azimuth": 335.53,
+      "distance_km": 95.4,
+      "angle_deg": 0.5424
+    },
+    {
+      "name": "鈴ヶ岳",
+      "lat": 36.5545,
+      "lon": 139.151995,
+      "elev": 1565,
+      "azimuth": 335.67,
+      "distance_km": 98.8,
+      "angle_deg": 0.4937
+    },
+    {
+      "name": "地蔵岳",
+      "lat": 36.541034,
+      "lon": 139.177352,
+      "elev": 1674,
+      "azimuth": 336.52,
+      "distance_km": 96.5,
+      "angle_deg": 0.5882
+    },
+    {
+      "name": "薬師岳",
+      "lat": 36.561644,
+      "lon": 139.169977,
+      "elev": 1528,
+      "azimuth": 336.71,
+      "distance_km": 98.9,
+      "angle_deg": 0.4714
+    },
+    {
+      "name": "長七郎山",
+      "lat": 36.532747,
+      "lon": 139.189676,
+      "elev": 1579,
+      "azimuth": 336.91,
+      "distance_km": 95.3,
+      "angle_deg": 0.5491
+    },
+    {
+      "name": "黒檜山",
+      "lat": 36.560373,
+      "lon": 139.193287,
+      "elev": 1828,
+      "azimuth": 337.79,
+      "distance_km": 98.0,
+      "angle_deg": 0.6588
+    },
+    {
+      "name": "獅子ヶ鼻山",
+      "lat": 36.797035,
+      "lon": 139.11287,
+      "elev": 1875,
+      "azimuth": 339.35,
+      "distance_km": 125.0,
+      "angle_deg": 0.3489
+    },
+    {
+      "name": "剣ヶ峰山",
+      "lat": 36.794617,
+      "lon": 139.12144,
+      "elev": 2020,
+      "azimuth": 339.64,
+      "distance_km": 124.5,
+      "angle_deg": 0.4212
+    }
+  ]
+}

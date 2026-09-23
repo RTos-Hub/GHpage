@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yamanoha-nc-v1';
+const CACHE_NAME = 'yamanoha-sj-v1';
 const ASSETS = [
   './',
   './index.html',

@@ -1,7 +1,7 @@
 {
-  "name": "山の端 — 練馬区役所展望ロビーからの眺望",
-  "short_name": "練馬展望ロビー",
-  "description": "練馬区役所展望ロビーから見える奥秩父・奥多摩・丹沢・富士山の山並みビューア",
+  "name": "山の端 — 東京北部からの眺望",
+  "short_name": "東京北部",
+  "description": "東京北部から見える奥秩父・奥多摩・丹沢・富士山の山並みビューア",
   "start_url": "./index.html",
   "display": "fullscreen",
   "background_color": "#1a1a2e",
