@@ -141,6 +141,64 @@
       text-overflow: ellipsis;
     }
 
+    /* 使い方ボタン: ヘッダーの右端 */
+    #usage-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+    }
+    #usage-btn:hover { background: rgba(100,150,200,0.5); }
+
+    /* ── 操作ガイド（使い方ボタンで表示） ───── */
+    #usage-hint {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 25, 55, 0.75);
+      z-index: 390;
+      cursor: pointer;
+      transition: opacity 0.4s;
+    }
+    #usage-hint.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #usage-hint .hint-box {
+      background: rgba(30, 60, 100, 0.95);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 10px;
+      padding: 22px 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 90vw;
+    }
+    #usage-hint .hint-text {
+      font-size: 1.0rem;
+      color: var(--ui-accent);
+      line-height: 1.6;
+    }
+    #usage-hint .hint-sub {
+      font-size: 0.72rem;
+      color: #8a9aaa;
+    }
+    #usage-hint .pc-only { display: none; }
+    @media (hover: hover) and (pointer: fine) {
+      #usage-hint .touch-only { display: none; }
+      #usage-hint .pc-only { display: block; }
+      #usage-hint span.pc-only { display: inline; }
+    }
+
     /* ── ビューア本体 ───────────────────────── */
     #viewer {
       flex: 1;
@@ -168,9 +226,22 @@
       </select>
     </div>
     <span class="subtitle" id="subtitle"></span>
+    <button id="usage-btn">使い方</button>
   </div>
 
   <iframe id="viewer" title="山の端ビューア"></iframe>
+</div>
+
+<div id="usage-hint" class="hidden">
+  <div class="hint-box">
+    <div class="hint-text touch-only">画面をタップすると、そこの稜線の山の名前,標高,距離がわかります</div>
+    <div class="hint-text touch-only">画面を２本指で広げて、見やすい横倍率にしてください</div>
+    <div class="hint-text touch-only">画面左端をタップすると左の山に、右端で右の山に移動します</div>
+    <div class="hint-text pc-only">画面をクリックすると、そこの稜線の山の名前,標高,距離がわかります</div>
+    <div class="hint-text pc-only">マウスホイールで、見やすい横倍率にしてください</div>
+    <div class="hint-text pc-only">画面左端をクリックすると左の山に、右端で右の山に移動します</div>
+    <div class="hint-sub"><span class="touch-only">タップ</span><span class="pc-only">クリック</span>で閉じる</div>
+  </div>
 </div>
 
 <script>
@@ -184,7 +255,7 @@ let lastTextTapAt = 0;
 document.addEventListener("touchend", e => {
   const t = e.target;
   if (!t.closest("#header")) return;
-  if (t.closest("select, option")) return;
+  if (t.closest("select, option, button")) return;
   const now = Date.now();
   if (now - lastTextTapAt < 350) e.preventDefault();
   lastTextTapAt = now;
@@ -273,6 +344,17 @@ viewer.addEventListener("load", () => {
 });
 
 select.addEventListener("change", () => showView(select.value));
+
+// 使い方ガイド（ボタンで開き、タップ／クリックで閉じる）
+(function () {
+  const hint = document.getElementById("usage-hint");
+  const close = () => hint.classList.add("hidden");
+  hint.addEventListener("click", close);
+  hint.addEventListener("touchend", e => { e.preventDefault(); close(); });
+  document.getElementById("usage-btn").addEventListener("click", () => {
+    hint.classList.remove("hidden");
+  });
+})();
 
 showView(initialView());
 
