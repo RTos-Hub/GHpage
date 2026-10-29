@@ -235,7 +235,8 @@
     }
 
     /* ── 地図ボタン／クレジットボタン ───────────── */
-    #map-btn, #credit-btn {
+    #usage-btn { margin-left: auto; }
+    #map-btn, #credit-btn, #usage-btn {
       background: rgba(100,150,200,0.25);
       border: 1px solid rgba(170,204,238,0.4);
       color: var(--ui-accent);
@@ -246,7 +247,7 @@
       font-family: var(--font-main);
       flex-shrink: 0;
     }
-    #map-btn:hover, #credit-btn:hover { background: rgba(100,150,200,0.5); }
+    #map-btn:hover, #credit-btn:hover, #usage-btn:hover { background: rgba(100,150,200,0.5); }
 
     /* ── 地図オーバーレイ ───────────────────── */
     #map-overlay {
@@ -378,6 +379,49 @@
       color: #8a9aaa;
     }
 
+    /* ── 操作ガイド（起動時に1回だけ表示） ──── */
+    #usage-hint {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 25, 55, 0.75);
+      z-index: 390;
+      cursor: pointer;
+      transition: opacity 0.4s;
+    }
+    #usage-hint.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #usage-hint .hint-box {
+      background: rgba(30, 60, 100, 0.95);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 10px;
+      padding: 22px 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 90vw;
+    }
+    #usage-hint .hint-text {
+      font-size: 1.0rem;
+      color: var(--ui-accent);
+      line-height: 1.6;
+    }
+    #usage-hint .pc-only { display: none; }
+    @media (hover: hover) and (pointer: fine) {
+      #usage-hint .touch-only { display: none; }
+      #usage-hint .pc-only { display: block; }
+      #usage-hint span.pc-only { display: inline; }
+    }
+    #usage-hint .hint-sub {
+      font-size: 0.72rem;
+      color: #8a9aaa;
+    }
+
     /* ── クレジットオーバーレイ ─────────────── */
     #credit-overlay {
       position: fixed;
@@ -460,6 +504,7 @@
   <div id="header">
     <h1>山の端</h1>
     <span class="subtitle">練馬区役所展望ロビー（35.736°N 139.652°E、標高120.9m）から見た西方の稜線</span>
+    <button id="usage-btn">使い方</button>
   </div>
 
   <div id="toolbar">
@@ -524,6 +569,18 @@
   </div>
 </div>
 
+<div id="usage-hint" class="hidden">
+  <div class="hint-box">
+    <div class="hint-text touch-only">画面をタップすると、そこの稜線の山の名前,標高,距離がわかります</div>
+    <div class="hint-text touch-only">画面を２本指で広げて、見やすい横倍率にしてください</div>
+    <div class="hint-text touch-only">画面左端をタップすると左の山に、右端で右の山に移動します</div>
+    <div class="hint-text pc-only">画面をクリックすると、そこの稜線の山の名前,標高,距離がわかります</div>
+    <div class="hint-text pc-only">マウスホイールで、見やすい横倍率にしてください</div>
+    <div class="hint-text pc-only">画面左端をクリックすると左の山に、右端で右の山に移動します</div>
+    <div class="hint-sub"><span class="touch-only">タップ</span><span class="pc-only">クリック</span>で閉じる</div>
+  </div>
+</div>
+
 <div id="tooltip"></div>
 
 <script>
@@ -549,6 +606,9 @@ document.addEventListener("touchend", e => {
 // 定数
 // ═══════════════════════════════════════════════
 const DATA_FILE = "horizon_export.json";
+
+// 起動時に操作ガイド（#usage-hint）を自動表示するか。false でも「使い方」ボタンで開ける
+const SHOW_USAGE_HINT_ON_START = true;
 
 // キャンバスの物理的な高さ（px）— ウィンドウに合わせる
 // 1度 = SCALE_PX px とする（縦横共通）→ 等スケール
@@ -1444,6 +1504,7 @@ async function init() {
     setupClickSelect();
     updateCanvasHeight();
     draw();
+    if (SHOW_USAGE_HINT_ON_START) showUsageHint();
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
       `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
@@ -1451,6 +1512,15 @@ async function init() {
     console.error(err);
   }
 }
+
+const usageHint = document.getElementById("usage-hint");
+function showUsageHint() { usageHint.classList.remove("hidden"); }
+(function () {
+  const close = () => usageHint.classList.add("hidden");
+  usageHint.addEventListener("click", close);
+  usageHint.addEventListener("touchend", function (e) { e.preventDefault(); close(); });
+  document.getElementById("usage-btn").addEventListener("click", showUsageHint);
+})();
 
 init();
 
