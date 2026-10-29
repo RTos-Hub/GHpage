@@ -245,7 +245,8 @@
     }
 
     /* ── 地図ボタン／クレジットボタン ───────────── */
-    #map-btn, #credit-btn {
+    #usage-btn { margin-left: auto; }
+    #map-btn, #credit-btn, #usage-btn {
       background: rgba(100,150,200,0.25);
       border: 1px solid rgba(170,204,238,0.4);
       color: var(--ui-accent);
@@ -256,7 +257,7 @@
       font-family: var(--font-main);
       flex-shrink: 0;
     }
-    #map-btn:hover, #credit-btn:hover { background: rgba(100,150,200,0.5); }
+    #map-btn:hover, #credit-btn:hover, #usage-btn:hover { background: rgba(100,150,200,0.5); }
 
     /* ── 地図オーバーレイ ───────────────────── */
     #map-overlay {
@@ -420,6 +421,12 @@
       color: var(--ui-accent);
       line-height: 1.6;
     }
+    #usage-hint .pc-only { display: none; }
+    @media (hover: hover) and (pointer: fine) {
+      #usage-hint .touch-only { display: none; }
+      #usage-hint .pc-only { display: block; }
+      #usage-hint span.pc-only { display: inline; }
+    }
     #usage-hint .hint-sub {
       font-size: 0.72rem;
       color: #8a9aaa;
@@ -507,6 +514,7 @@
   <div id="header">
     <h1>山の端</h1>
     <span class="subtitle">東京都庁展望室（35.690°N 139.692°E、標高239.7m）から見た西方の稜線</span>
+    <button id="usage-btn">使い方</button>
   </div>
 
   <div id="toolbar">
@@ -574,10 +582,13 @@
 
 <div id="usage-hint" class="hidden">
   <div class="hint-box">
-    <div class="hint-text">画面をタップすると、そこにある山の名前がわかります</div>
-    <div class="hint-text">画面を２本指で広げて見やすい横倍率にしてください</div>
-    <div class="hint-text">画面の左端をタップすると左の山に、右端で右の山に移動します</div>
-    <div class="hint-sub">タップで閉じる</div>
+    <div class="hint-text touch-only">画面をタップすると、そこの稜線の山の名前,標高,距離がわかります</div>
+    <div class="hint-text touch-only">画面を２本指で広げて、見やすい横倍率にしてください</div>
+    <div class="hint-text touch-only">画面左端をタップすると左の山に、右端で右の山に移動します</div>
+    <div class="hint-text pc-only">画面をクリックすると、そこの稜線の山の名前,標高,距離がわかります</div>
+    <div class="hint-text pc-only">マウスホイールで、見やすい横倍率にしてください</div>
+    <div class="hint-text pc-only">画面左端をクリックすると左の山に、右端で右の山に移動します</div>
+    <div class="hint-sub"><span class="touch-only">タップ</span><span class="pc-only">クリック</span>で閉じる</div>
   </div>
 </div>
 
@@ -1508,13 +1519,14 @@ async function init() {
 }
 
 // ── 操作ガイド（起動時に1回だけ表示。タップで閉じる）──
-function showUsageHint() {
-  const el = document.getElementById("usage-hint");
-  el.classList.remove("hidden");
-  const close = () => el.classList.add("hidden");
-  el.addEventListener("click", close);
-  el.addEventListener("touchend", function (e) { e.preventDefault(); close(); });
-}
+const usageHint = document.getElementById("usage-hint");
+function showUsageHint() { usageHint.classList.remove("hidden"); }
+(function () {
+  const close = () => usageHint.classList.add("hidden");
+  usageHint.addEventListener("click", close);
+  usageHint.addEventListener("touchend", function (e) { e.preventDefault(); close(); });
+  document.getElementById("usage-btn").addEventListener("click", showUsageHint);
+})();
 
 init();
 
