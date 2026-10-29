@@ -388,6 +388,43 @@
       color: #8a9aaa;
     }
 
+    /* ── 操作ガイド（起動時に1回だけ表示） ──── */
+    #usage-hint {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 25, 55, 0.75);
+      z-index: 390;
+      cursor: pointer;
+      transition: opacity 0.4s;
+    }
+    #usage-hint.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #usage-hint .hint-box {
+      background: rgba(30, 60, 100, 0.95);
+      border: 1px solid rgba(170,204,238,0.4);
+      border-radius: 10px;
+      padding: 22px 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 90vw;
+    }
+    #usage-hint .hint-text {
+      font-size: 1.0rem;
+      color: var(--ui-accent);
+      line-height: 1.6;
+    }
+    #usage-hint .hint-sub {
+      font-size: 0.72rem;
+      color: #8a9aaa;
+    }
+
     /* ── クレジットオーバーレイ ─────────────── */
     #credit-overlay {
       position: fixed;
@@ -531,6 +568,15 @@
   <div class="hint-box">
     <div class="hint-icon">&#x21BB;</div>
     <div class="hint-text">横向きの画面でご覧ください</div>
+    <div class="hint-sub">タップで閉じる</div>
+  </div>
+</div>
+
+<div id="usage-hint" class="hidden">
+  <div class="hint-box">
+    <div class="hint-text">画面をタップすると、そこにある山の名前がわかります</div>
+    <div class="hint-text">画面を２本指で広げて見やすい横倍率にしてください</div>
+    <div class="hint-text">画面の左端をタップすると左の山に、右端で右の山に移動します</div>
     <div class="hint-sub">タップで閉じる</div>
   </div>
 </div>
@@ -1452,12 +1498,22 @@ async function init() {
     setupClickSelect();
     updateCanvasHeight();
     draw();
+    showUsageHint();
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
       `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
     document.querySelector("#loading .note").style.display = "none";
     console.error(err);
   }
+}
+
+// ── 操作ガイド（起動時に1回だけ表示。タップで閉じる）──
+function showUsageHint() {
+  const el = document.getElementById("usage-hint");
+  el.classList.remove("hidden");
+  const close = () => el.classList.add("hidden");
+  el.addEventListener("click", close);
+  el.addEventListener("touchend", function (e) { e.preventDefault(); close(); });
 }
 
 init();
