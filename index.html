@@ -155,49 +155,7 @@
       font-family: var(--font-main);
     }
     #usage-btn:hover { background: rgba(100,150,200,0.5); }
-
-    /* ── 操作ガイド（使い方ボタンで表示） ───── */
-    #usage-hint {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(10, 25, 55, 0.75);
-      z-index: 390;
-      cursor: pointer;
-      transition: opacity 0.4s;
-    }
-    #usage-hint.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    #usage-hint .hint-box {
-      background: rgba(30, 60, 100, 0.95);
-      border: 1px solid rgba(170,204,238,0.4);
-      border-radius: 10px;
-      padding: 22px 30px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 90vw;
-    }
-    #usage-hint .hint-text {
-      font-size: 1.0rem;
-      color: var(--ui-accent);
-      line-height: 1.6;
-    }
-    #usage-hint .hint-sub {
-      font-size: 0.72rem;
-      color: #8a9aaa;
-    }
-    #usage-hint .pc-only { display: none; }
-    @media (hover: hover) and (pointer: fine) {
-      #usage-hint .touch-only { display: none; }
-      #usage-hint .pc-only { display: block; }
-      #usage-hint span.pc-only { display: inline; }
-    }
+    #usage-btn[hidden] { display: none; }
 
     /* ── ビューア本体 ───────────────────────── */
     #viewer {
@@ -232,18 +190,6 @@
   <iframe id="viewer" title="山の端ビューア"></iframe>
 </div>
 
-<div id="usage-hint" class="hidden">
-  <div class="hint-box">
-    <div class="hint-text touch-only">画面をタップすると、そこの稜線の山の名前,標高,距離がわかります</div>
-    <div class="hint-text touch-only">画面を２本指で広げて、見やすい横倍率にしてください</div>
-    <div class="hint-text touch-only">画面左端をタップすると左の山に、右端で右の山に移動します</div>
-    <div class="hint-text pc-only">画面をクリックすると、そこの稜線の山の名前,標高,距離がわかります</div>
-    <div class="hint-text pc-only">マウスホイールで、見やすい横倍率にしてください</div>
-    <div class="hint-text pc-only">画面左端をクリックすると左の山に、右端で右の山に移動します</div>
-    <div class="hint-sub"><span class="touch-only">タップ</span><span class="pc-only">クリック</span>で閉じる</div>
-  </div>
-</div>
-
 <script>
 // iOS Safari はピンチズームを touch-action とは別の gesture イベントで扱うため無効化する
 ["gesturestart", "gesturechange", "gestureend"].forEach(type => {
@@ -274,6 +220,7 @@ const STORAGE_KEY = "yamanoha-view";
 const viewer    = document.getElementById("viewer");
 const select    = document.getElementById("view-select");
 const subtitle  = document.getElementById("subtitle");
+const usageBtn  = document.getElementById("usage-btn");
 let   loadCount = 0;
 
 function readSavedView() {
@@ -322,7 +269,8 @@ viewer.addEventListener("load", () => {
     style.textContent =
       "#header { display: none !important; }" +
       // 横向きガイドは最初に開いた視点でだけ表示する
-      (loadCount > 1 ? "#landscape-hint { display: none !important; }" : "");
+      // 起動時の使い方ガイドも同様（「使い方」ボタンからは開ける）
+      (loadCount > 1 ? "#landscape-hint, #usage-hint { display: none !important; }" : "");
     doc.head.appendChild(style);
 
     // ビューアのサブタイトル（座標・標高）とページタイトルを取り込む。
@@ -335,6 +283,9 @@ viewer.addEventListener("load", () => {
     subtitle.title = subtitle.textContent;
     if (doc.title) document.title = doc.title;
 
+    // 使い方ガイドを持たないビューアでは「使い方」ボタンを隠す
+    usageBtn.hidden = !viewer.contentWindow.showUsageHint;
+
     // ビューアはヘッダーの高さを差し引いてキャンバスの高さを決めているため、
     // ヘッダーを隠したことを resize イベントで知らせる
     viewer.contentWindow.dispatchEvent(new Event("resize"));
@@ -345,16 +296,15 @@ viewer.addEventListener("load", () => {
 
 select.addEventListener("change", () => showView(select.value));
 
-// 使い方ガイド（ボタンで開き、タップ／クリックで閉じる）
-(function () {
-  const hint = document.getElementById("usage-hint");
-  const close = () => hint.classList.add("hidden");
-  hint.addEventListener("click", close);
-  hint.addEventListener("touchend", e => { e.preventDefault(); close(); });
-  document.getElementById("usage-btn").addEventListener("click", () => {
-    hint.classList.remove("hidden");
-  });
-})();
+// 使い方ガイドは各ビューア内の #usage-hint。ボタンでビューアの showUsageHint() を呼ぶ
+document.getElementById("usage-btn").addEventListener("click", () => {
+  try {
+    const w = viewer.contentWindow;
+    // 2回目以降の視点では注入した CSS で隠してあるので、インラインの !important で打ち消す
+    w.document.getElementById("usage-hint").style.setProperty("display", "flex", "important");
+    w.showUsageHint();
+  } catch (e) { /* ガイド未実装のビューア */ }
+});
 
 showView(initialView());
 
