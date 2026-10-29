@@ -618,6 +618,9 @@ document.addEventListener("touchend", e => {
 // ═══════════════════════════════════════════════
 const DATA_FILE = "horizon_export.json";
 
+// 起動時に操作ガイド（#usage-hint）を自動表示するか。false でも「使い方」ボタンで開ける
+const SHOW_USAGE_HINT_ON_START = true;
+
 // キャンバスの物理的な高さ（px）— ウィンドウに合わせる
 // 1度 = SCALE_PX px とする（縦横共通）→ 等スケール
 const DEG_PER_PX_BASE = 1 / 80;   // 80px = 1度 が基準
@@ -1509,7 +1512,7 @@ async function init() {
     setupClickSelect();
     updateCanvasHeight();
     draw();
-    showUsageHint();
+    if (SHOW_USAGE_HINT_ON_START) showUsageHint();
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
       `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
