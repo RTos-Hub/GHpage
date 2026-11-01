@@ -609,6 +609,8 @@ const DATA_FILE = "horizon_export.json";
 
 // 起動時に操作ガイド（#usage-hint）を自動表示するか。false でも「使い方」ボタンで開ける
 const SHOW_USAGE_HINT_ON_START = true;
+// 自動表示するまでの待ち時間（ページを開いてからの経過ミリ秒）
+const USAGE_HINT_DELAY_MS = 5000;
 
 // キャンバスの物理的な高さ（px）— ウィンドウに合わせる
 // 1度 = SCALE_PX px とする（縦横共通）→ 等スケール
@@ -1504,7 +1506,11 @@ async function init() {
     setupClickSelect();
     updateCanvasHeight();
     draw();
-    if (SHOW_USAGE_HINT_ON_START) showUsageHint();
+    if (SHOW_USAGE_HINT_ON_START) {
+      // 起動から USAGE_HINT_DELAY_MS 経っていなければ残りの時間だけ待つ。待つ間にボタンで開いていたら出さない
+      setTimeout(showUsageHintWhenReady,
+                 Math.max(0, USAGE_HINT_DELAY_MS - performance.now()));
+    }
   } catch (err) {
     document.querySelector("#loading .msg").textContent =
       `❌ ${err.message} — horizon_export.json を同じフォルダに置いてください`;
@@ -1514,7 +1520,21 @@ async function init() {
 }
 
 const usageHint = document.getElementById("usage-hint");
-function showUsageHint() { usageHint.classList.remove("hidden"); }
+let usageHintShown = false;
+function showUsageHint() { usageHintShown = true; usageHint.classList.remove("hidden"); }
+// 自動表示用: 横向きガイド（スマホ縦向きで表示）が出ている間は待ち、
+// 閉じられた／横向きになった USAGE_HINT_DELAY_MS 後に表示する（回転操作中に出るのを避ける）
+function showUsageHintWhenReady() {
+  if (usageHintShown) return;
+  const lh = document.getElementById("landscape-hint");
+  if (lh.classList.contains("hidden")) { showUsageHint(); return; }
+  const mo = new MutationObserver(() => {
+    if (!lh.classList.contains("hidden")) return;
+    mo.disconnect();
+    setTimeout(showUsageHintWhenReady, USAGE_HINT_DELAY_MS);
+  });
+  mo.observe(lh, { attributes: true, attributeFilter: ["class"] });
+}
 (function () {
   const close = () => usageHint.classList.add("hidden");
   usageHint.addEventListener("click", close);
