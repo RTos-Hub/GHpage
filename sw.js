@@ -1,5 +1,5 @@
 // ルート（視点切り替えページ）用の Service Worker。
-// 各ビューア（./NC ./TC ./SJ）はそれぞれ自分の sw.js を持つので、
+// 各ビューア（./NC ./TC ./SJ ./ST）はそれぞれ自分の sw.js を持つので、
 // ここではルート直下のファイルだけを扱い、サブフォルダへの要求には関与しない。
 const CACHE_NAME = 'yamanoha-root-v1';
 const ASSETS = [
