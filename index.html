@@ -29,7 +29,8 @@
 
   <!-- OGP (Open Graph Protocol) -->
   <meta property="og:title" content="山の端 — 東京から見える富士山と山並みの名前がわかるシミュレーター">
-  <meta property="og:description" content="東京から見える山並みを地形データより再現.視点切替,スマホ対応,タップで山名,両端タップで山移動,ピンチで倍率変更,ドラッグで方位変更.">
+  <meta property="og:description" content="東京から見える富士山などの山並みを地形データから再現。4つの視点を切り替えられ、タップで山名・標高・距離を表示。両端タップで隣の山へ移動、ピンチで倍率、ドラッグで方角を変更できます。スマホ対応。">
+  <meta property="og:site_name" content="山の端">
   <meta property="og:image" content="https://rtos-hub.github.io/GHpage/ogp.png">
   <meta property="og:url" content="https://rtos-hub.github.io/GHpage/">
   <meta property="og:type" content="website">
@@ -37,6 +38,40 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
+
+  <!-- 構造化データ（JSON-LD）: 検索エンジンにこのページが無料の Web アプリであることを伝える -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "山の端",
+    "alternateName": "山の端 — 東京から見える富士山と山並みの名前がわかるシミュレーター",
+    "url": "https://rtos-hub.github.io/GHpage/",
+    "description": "東京から見える富士山や奥多摩などの山並みを地形データから再現したWebツール。視点を切り替えて山の名前や位置を確認できます。",
+    "image": "https://rtos-hub.github.io/GHpage/ogp.png",
+    "inLanguage": "ja",
+    "applicationCategory": "TravelApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "JavaScript が有効なブラウザ",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "JPY"
+    },
+    "featureList": [
+      "稜線をタップ（クリック）して山の名前・標高・距離を表示",
+      "東京北部の地上・練馬区役所展望ロビー・東京都庁展望室・東京スカイツリー展望デッキの4視点を切り替え",
+      "地球の丸みと大気による光の屈折を考慮した稜線の計算"
+    ],
+    "hasPart": [
+      { "@type": "WebPage", "name": "東京北部から見える山並み", "url": "https://rtos-hub.github.io/GHpage/SJ/" },
+      { "@type": "WebPage", "name": "練馬区役所展望ロビーから見える山並み", "url": "https://rtos-hub.github.io/GHpage/NC/" },
+      { "@type": "WebPage", "name": "東京都庁展望室から見える山並み", "url": "https://rtos-hub.github.io/GHpage/TC/" },
+      { "@type": "WebPage", "name": "東京スカイツリー展望デッキから見える山並み", "url": "https://rtos-hub.github.io/GHpage/ST/" }
+    ]
+  }
+  </script>
 
   <style>
     /* ── リセット・基礎 ─────────────────────── */
