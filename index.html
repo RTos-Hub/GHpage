@@ -20,13 +20,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- 検索エンジン向け基本設定 -->
-  <title>山の端 — 東京から見える山並みシミュレーター</title>
+  <title>山の端 — 東京から見える富士山と山並みの名前がわかるシミュレーター</title>
+  <!-- ?v=SJ 等のクエリ付き URL を重複ページとして扱わせない -->
+  <link rel="canonical" href="https://rtos-hub.github.io/GHpage/">
   <meta name="description" content="東京から見える富士山や奥多摩などの山並みを地形データから再現したWebツール。視点を切り替えて山の名前や位置を確認できます。">
   <meta name="keywords" content="東京都庁,練馬区役所,東京スカイツリー,展望デッキ,展望室,展望ロビー,山,稜線,地形データ">
   <meta name="google-site-verification" content="5EFQY2j4xA6YwSnMCd0jZUmXuqOqqt65Y9Ba-PZkMbk" />
 
   <!-- OGP (Open Graph Protocol) -->
-  <meta property="og:title" content="山の端 — 東京から見える山並みシミュレーター">
+  <meta property="og:title" content="山の端 — 東京から見える富士山と山並みの名前がわかるシミュレーター">
   <meta property="og:description" content="東京から見える山並みを地形データより再現.視点切替,スマホ対応,タップで山名,両端タップで山移動,ピンチで倍率変更,ドラッグで方位変更.">
   <meta property="og:image" content="https://rtos-hub.github.io/GHpage/ogp.png">
   <meta property="og:url" content="https://rtos-hub.github.io/GHpage/">
@@ -170,6 +172,36 @@
       visibility: hidden;
     }
     #viewer.ready { visibility: visible; }
+
+    /* ── フッター（各ビューアを単独で開くリンク） ──
+       検索エンジンが各ビューアのページを辿れるよう、通常の <a> リンクで置く */
+    #footer {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      background: var(--ui-bg);
+      border-top: 1px solid rgba(170,204,238,0.3);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: #8a9aaa;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    #footer::-webkit-scrollbar { display: none; }
+    #footer ul { display: inline; list-style: none; }
+    #footer li { display: inline; }
+    #footer li + li::before { content: " ｜ "; color: #5a6a7a; }
+    #footer a { color: var(--ui-accent); text-decoration: none; }
+    #footer a:hover { text-decoration: underline; }
+
+    /* スマートフォン（タッチ操作で、短辺が 600px 以下）では縦向き・横向きとも
+       フッターを隠してビューアの表示領域を確保する。
+       リンクは HTML に残るので、検索エンジンは引き続き辿れる */
+    @media (pointer: coarse) and (max-width: 600px),
+           (pointer: coarse) and (max-height: 600px) {
+      #footer { display: none; }
+    }
   </style>
 </head>
 
@@ -190,6 +222,16 @@
   </div>
 
   <iframe id="viewer" title="山の端ビューア"></iframe>
+
+  <nav id="footer" aria-label="各視点のビューアを単独で開く">
+    単独で開く：
+    <ul>
+      <li><a href="./SJ/">東京北部から見える山</a></li>
+      <li><a href="./NC/">練馬区役所展望ロビーから見える山</a></li>
+      <li><a href="./TC/">東京都庁展望室から見える山</a></li>
+      <li><a href="./ST/">東京スカイツリー展望デッキから見える山</a></li>
+    </ul>
+  </nav>
 </div>
 
 <script>
@@ -224,6 +266,9 @@ const select    = document.getElementById("view-select");
 const subtitle  = document.getElementById("subtitle");
 const usageBtn  = document.getElementById("usage-btn");
 let   loadCount = 0;
+// ユーザーがリストボックスで視点を切り替えたか。
+// 初回表示ではページタイトルを上書きしない（検索エンジンにルートのタイトルを見せるため）
+let   userSwitched = false;
 
 function readSavedView() {
   try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
@@ -283,7 +328,7 @@ viewer.addEventListener("load", () => {
     const paren = text.indexOf("（");
     subtitle.textContent = paren > 0 ? text.slice(paren) : text;
     subtitle.title = subtitle.textContent;
-    if (doc.title) document.title = doc.title;
+    if (userSwitched && doc.title) document.title = doc.title;
 
     // 使い方ガイドを持たないビューアでは「使い方」ボタンを隠す
     usageBtn.hidden = !viewer.contentWindow.showUsageHint;
@@ -296,7 +341,10 @@ viewer.addEventListener("load", () => {
   viewer.classList.add("ready");
 });
 
-select.addEventListener("change", () => showView(select.value));
+select.addEventListener("change", () => {
+  userSwitched = true;
+  showView(select.value);
+});
 
 // 使い方ガイドは各ビューア内の #usage-hint。ボタンでビューアの showUsageHint() を呼ぶ
 document.getElementById("usage-btn").addEventListener("click", () => {
