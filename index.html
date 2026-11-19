@@ -160,6 +160,84 @@
     #usage-btn:hover { background: rgba(100,150,200,0.5); }
     #usage-btn[hidden] { display: none; }
 
+    /* 「このサイトについて」ボタン: 「使い方」ボタンの右。
+       「使い方」が隠れている場合もヘッダーの右端に寄せる */
+    #about-btn {
+      flex-shrink: 0;
+      background: rgba(100,150,200,0.25);
+      border: 1px solid rgba(170,204,238,0.4);
+      color: var(--ui-accent);
+      padding: 3px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-family: var(--font-main);
+    }
+    #about-btn:hover { background: rgba(100,150,200,0.5); }
+    #usage-btn[hidden] + #about-btn { margin-left: auto; }
+    #about-btn .label-short { display: none; }
+
+    /* ── 説明パネル（このサイトについて） ──────
+       見た目は各ビューアのクレジットパネルにそろえる。
+       本文は HTML に直接書いてあるので、検索エンジンが読める */
+    #about-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 20px;
+    }
+    #about-overlay.visible { display: flex; }
+    #about-box {
+      background: rgba(250,250,248,0.98);
+      color: #222;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      max-height: 85dvh;
+      overflow-y: auto;
+      border-radius: 8px;
+      padding: 22px 26px;
+      position: relative;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.6);
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+    #about-box h2 {
+      font-size: 0.95rem;
+      margin: 0 36px 10px 0;
+      color: #2a4a6a;
+    }
+    #about-box h3 {
+      font-size: 0.82rem;
+      margin: 14px 0 4px;
+      color: #3a5878;
+    }
+    #about-box p  { margin: 2px 0; }
+    #about-box ul { margin: 2px 0 2px 1.3em; }
+    #about-box a  { color: #2266bb; }
+    #about-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: rgba(0,0,0,0.06);
+      border: none;
+      color: #333;
+      font-size: 1.2rem;
+      line-height: 1;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #about-close:hover { background: rgba(0,0,0,0.14); }
+
     /* ── ビューア本体 ───────────────────────── */
     #viewer {
       flex: 1;
@@ -201,6 +279,17 @@
     @media (pointer: coarse) and (max-width: 600px),
            (pointer: coarse) and (max-height: 600px) {
       #footer { display: none; }
+      /* ヘッダーが詰まるので、視点の座標・標高（サブタイトル）も隠す */
+      #header .subtitle { display: none; }
+      /* サブタイトルが無くなった分、ボタンを右端に寄せる */
+      #usage-btn { margin-left: auto; }
+    }
+
+    /* 幅の狭い画面（スマートフォンの縦向きなど）ではボタン名を短くする */
+    @media (max-width: 480px) {
+      #header { gap: 8px; padding: 4px 10px; }
+      #about-btn .label-full  { display: none; }
+      #about-btn .label-short { display: inline; }
     }
   </style>
 </head>
@@ -219,6 +308,7 @@
     </div>
     <span class="subtitle" id="subtitle"></span>
     <button id="usage-btn">使い方</button>
+    <button id="about-btn" aria-haspopup="dialog" aria-controls="about-overlay"><span class="label-full">このサイトについて</span><span class="label-short">概要</span></button>
   </div>
 
   <iframe id="viewer" title="山の端ビューア"></iframe>
@@ -232,6 +322,34 @@
       <li><a href="./ST/">東京スカイツリー展望デッキから見える山</a></li>
     </ul>
   </nav>
+</div>
+
+<div id="about-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title">
+  <div id="about-box">
+    <button id="about-close" aria-label="閉じる">&#x2715;</button>
+    <h2 id="about-title">山の端（やまのは）について</h2>
+    <p>「山の端」は、東京の4つの視点から西の方角に見える山並み（稜線）を、標高データから再現して表示するWebツールです。富士山をはじめ、丹沢・奥多摩・奥秩父などの山々が、どの方角にどのように見えるかを確かめられます。</p>
+
+    <h3>できること</h3>
+    <ul>
+      <li>稜線をタップ（クリック）すると、そこに見える山の名前・標高・距離を表示します。</li>
+      <li>山名のリストから山を選ぶと、その山の方角に移動します。</li>
+      <li>ピンチ操作やマウスホイールで横方向の倍率を、ドラッグで方角を変えられます。</li>
+      <li>地球の丸みと大気による光の屈折を考慮して、実際の見え方に近い稜線を計算しています。</li>
+    </ul>
+
+    <h3>視点</h3>
+    <ul>
+      <li><a href="./SJ/" data-view="SJ">東京北部の地上</a>（標高45m）</li>
+      <li><a href="./NC/" data-view="NC">練馬区役所展望ロビー</a>（標高120.9m）</li>
+      <li><a href="./TC/" data-view="TC">東京都庁展望室</a>（標高239.7m）</li>
+      <li><a href="./ST/" data-view="ST">東京スカイツリー展望デッキ</a>（標高351.9m）</li>
+    </ul>
+    <p>ヘッダーのリストボックスで視点を切り替えられます。</p>
+
+    <h3>データ</h3>
+    <p>標高データは SRTM（U.S. Geological Survey / NASA）、山頂の名称・位置・標高は OpenStreetMap を使用しています。詳しくは各ビューアの「クレジット」をご覧ください。</p>
+  </div>
 </div>
 
 <script>
@@ -354,6 +472,35 @@ document.getElementById("usage-btn").addEventListener("click", () => {
     w.document.getElementById("usage-hint").style.setProperty("display", "flex", "important");
     w.showUsageHint();
   } catch (e) { /* ガイド未実装のビューア */ }
+});
+
+// 「このサイトについて」パネル
+const aboutOverlay = document.getElementById("about-overlay");
+const aboutBtn     = document.getElementById("about-btn");
+function closeAbout() {
+  aboutOverlay.classList.remove("visible");
+  aboutBtn.focus();
+}
+aboutBtn.addEventListener("click", () => {
+  aboutOverlay.classList.add("visible");
+  document.getElementById("about-close").focus();
+});
+document.getElementById("about-close").addEventListener("click", closeAbout);
+aboutOverlay.addEventListener("click", e => {
+  if (e.target === aboutOverlay) closeAbout();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && aboutOverlay.classList.contains("visible")) closeAbout();
+});
+// パネル内の視点リンク: 検索エンジン向けには通常のリンクだが、
+// 利用者がクリックした場合はページを移らず、このページの中で視点を切り替える
+aboutOverlay.querySelectorAll("a[data-view]").forEach(a => {
+  a.addEventListener("click", e => {
+    e.preventDefault();
+    userSwitched = true;
+    showView(a.dataset.view);
+    closeAbout();
+  });
 });
 
 showView(initialView());
